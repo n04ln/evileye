@@ -1,13 +1,31 @@
 /* Copyright (c) 2018 EvilEye Authors. All Rights Reserved. */
 
 syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.yt8492.evileye.protobuf";
+option java_outer_classname = "EeProto";
+
 package evileye;
 
 import "google/protobuf/empty.proto";
-import "entity.proto";
 
+message Tarekomi {
+    int64 target_user_id = 1;
+    string url = 3;
+    string desc = 4;
+}
 
-// rpc Req & Res
+message User {
+    int64 user_id = 1;
+    string user_name = 2;
+    repeated Tarekomi tarekomis = 3;
+}
+
+message HealthCheckRes {
+    string commit_hash = 1;
+    uint64 build_time = 2;
+}
+
 message TarekomiReq {
     Tarekomi tarekomi = 1;
 }
@@ -53,6 +71,12 @@ message AddStarReq {
 }
 
 service Private {
+    /*
+        HealthCheck
+
+        ヘルスチェック用
+     */
+    rpc HealthCheck(google.protobuf.Empty) returns (HealthCheckRes);
     /*
         Tarekomi
 
