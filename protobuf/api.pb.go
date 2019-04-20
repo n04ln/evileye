@@ -6,7 +6,12 @@ package evileye
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import _ "github.com/golang/protobuf/ptypes/empty"
+import empty "github.com/golang/protobuf/ptypes/empty"
+
+import (
+	context "golang.org/x/net/context"
+	grpc "google.golang.org/grpc"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -599,6 +604,387 @@ func init() {
 	proto.RegisterType((*GetUserListReq)(nil), "evileye.GetUserListReq")
 	proto.RegisterType((*Users)(nil), "evileye.Users")
 	proto.RegisterType((*AddStarReq)(nil), "evileye.AddStarReq")
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// PrivateClient is the client API for Private service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type PrivateClient interface {
+	//
+	// HealthCheck
+	//
+	// ヘルスチェック用
+	HealthCheck(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*HealthCheckRes, error)
+	//
+	// Tarekomi
+	//
+	// Tarekomi returns some status
+	// Invalid      ... invalid parameter
+	// Internal     ... an error occured in the server
+	// Unauthorized ... JWT is invalid
+	// タレコミをする
+	Tarekomi(ctx context.Context, in *TarekomiReq, opts ...grpc.CallOption) (*empty.Empty, error)
+	//
+	// Vote
+	//
+	// 投票は、匿名で行う
+	// descは、投票が完了して、ユーザ画面で表示される際には誰が投票したかは伏せて公開する
+	Vote(ctx context.Context, in *VoteReq, opts ...grpc.CallOption) (*empty.Empty, error)
+	//
+	// TarekomiBoard
+	//
+	// 投票待ちのタレコミを表示する
+	TarekomiBoard(ctx context.Context, in *TarekomiBoardReq, opts ...grpc.CallOption) (*TarekomiBoardRes, error)
+	//
+	// GetUserInfo
+	//
+	// ユーザの情報を返す
+	GetUserInfo(ctx context.Context, in *UserInfoReq, opts ...grpc.CallOption) (*User, error)
+	//
+	// GetUserList
+	//
+	// ユーザ一覧を返す
+	GetUserList(ctx context.Context, in *GetUserListReq, opts ...grpc.CallOption) (*Users, error)
+	//
+	// AddStar
+	//
+	// タレコミにStarをつける
+	// Approve済みのものだけ可能
+	AddStar(ctx context.Context, in *AddStarReq, opts ...grpc.CallOption) (*empty.Empty, error)
+	//
+	// GetStaredTarekomi
+	//
+	// 自分のスターしたタレコミ一覧
+	// JWTからユーザ情報を取得する
+	GetStaredTarekomi(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*TarekomiSummaries, error)
+}
+
+type privateClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewPrivateClient(cc *grpc.ClientConn) PrivateClient {
+	return &privateClient{cc}
+}
+
+func (c *privateClient) HealthCheck(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*HealthCheckRes, error) {
+	out := new(HealthCheckRes)
+	err := c.cc.Invoke(ctx, "/evileye.Private/HealthCheck", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *privateClient) Tarekomi(ctx context.Context, in *TarekomiReq, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/evileye.Private/Tarekomi", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *privateClient) Vote(ctx context.Context, in *VoteReq, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/evileye.Private/Vote", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *privateClient) TarekomiBoard(ctx context.Context, in *TarekomiBoardReq, opts ...grpc.CallOption) (*TarekomiBoardRes, error) {
+	out := new(TarekomiBoardRes)
+	err := c.cc.Invoke(ctx, "/evileye.Private/TarekomiBoard", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *privateClient) GetUserInfo(ctx context.Context, in *UserInfoReq, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/evileye.Private/GetUserInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *privateClient) GetUserList(ctx context.Context, in *GetUserListReq, opts ...grpc.CallOption) (*Users, error) {
+	out := new(Users)
+	err := c.cc.Invoke(ctx, "/evileye.Private/GetUserList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *privateClient) AddStar(ctx context.Context, in *AddStarReq, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/evileye.Private/AddStar", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *privateClient) GetStaredTarekomi(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*TarekomiSummaries, error) {
+	out := new(TarekomiSummaries)
+	err := c.cc.Invoke(ctx, "/evileye.Private/GetStaredTarekomi", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PrivateServer is the server API for Private service.
+type PrivateServer interface {
+	//
+	// HealthCheck
+	//
+	// ヘルスチェック用
+	HealthCheck(context.Context, *empty.Empty) (*HealthCheckRes, error)
+	//
+	// Tarekomi
+	//
+	// Tarekomi returns some status
+	// Invalid      ... invalid parameter
+	// Internal     ... an error occured in the server
+	// Unauthorized ... JWT is invalid
+	// タレコミをする
+	Tarekomi(context.Context, *TarekomiReq) (*empty.Empty, error)
+	//
+	// Vote
+	//
+	// 投票は、匿名で行う
+	// descは、投票が完了して、ユーザ画面で表示される際には誰が投票したかは伏せて公開する
+	Vote(context.Context, *VoteReq) (*empty.Empty, error)
+	//
+	// TarekomiBoard
+	//
+	// 投票待ちのタレコミを表示する
+	TarekomiBoard(context.Context, *TarekomiBoardReq) (*TarekomiBoardRes, error)
+	//
+	// GetUserInfo
+	//
+	// ユーザの情報を返す
+	GetUserInfo(context.Context, *UserInfoReq) (*User, error)
+	//
+	// GetUserList
+	//
+	// ユーザ一覧を返す
+	GetUserList(context.Context, *GetUserListReq) (*Users, error)
+	//
+	// AddStar
+	//
+	// タレコミにStarをつける
+	// Approve済みのものだけ可能
+	AddStar(context.Context, *AddStarReq) (*empty.Empty, error)
+	//
+	// GetStaredTarekomi
+	//
+	// 自分のスターしたタレコミ一覧
+	// JWTからユーザ情報を取得する
+	GetStaredTarekomi(context.Context, *empty.Empty) (*TarekomiSummaries, error)
+}
+
+func RegisterPrivateServer(s *grpc.Server, srv PrivateServer) {
+	s.RegisterService(&_Private_serviceDesc, srv)
+}
+
+func _Private_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateServer).HealthCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evileye.Private/HealthCheck",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateServer).HealthCheck(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Private_Tarekomi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TarekomiReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateServer).Tarekomi(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evileye.Private/Tarekomi",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateServer).Tarekomi(ctx, req.(*TarekomiReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Private_Vote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VoteReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateServer).Vote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evileye.Private/Vote",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateServer).Vote(ctx, req.(*VoteReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Private_TarekomiBoard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TarekomiBoardReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateServer).TarekomiBoard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evileye.Private/TarekomiBoard",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateServer).TarekomiBoard(ctx, req.(*TarekomiBoardReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Private_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserInfoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateServer).GetUserInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evileye.Private/GetUserInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateServer).GetUserInfo(ctx, req.(*UserInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Private_GetUserList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateServer).GetUserList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evileye.Private/GetUserList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateServer).GetUserList(ctx, req.(*GetUserListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Private_AddStar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddStarReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateServer).AddStar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evileye.Private/AddStar",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateServer).AddStar(ctx, req.(*AddStarReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Private_GetStaredTarekomi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateServer).GetStaredTarekomi(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evileye.Private/GetStaredTarekomi",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateServer).GetStaredTarekomi(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Private_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "evileye.Private",
+	HandlerType: (*PrivateServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "HealthCheck",
+			Handler:    _Private_HealthCheck_Handler,
+		},
+		{
+			MethodName: "Tarekomi",
+			Handler:    _Private_Tarekomi_Handler,
+		},
+		{
+			MethodName: "Vote",
+			Handler:    _Private_Vote_Handler,
+		},
+		{
+			MethodName: "TarekomiBoard",
+			Handler:    _Private_TarekomiBoard_Handler,
+		},
+		{
+			MethodName: "GetUserInfo",
+			Handler:    _Private_GetUserInfo_Handler,
+		},
+		{
+			MethodName: "GetUserList",
+			Handler:    _Private_GetUserList_Handler,
+		},
+		{
+			MethodName: "AddStar",
+			Handler:    _Private_AddStar_Handler,
+		},
+		{
+			MethodName: "GetStaredTarekomi",
+			Handler:    _Private_GetStaredTarekomi_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "protobuf/api.proto",
 }
 
 func init() { proto.RegisterFile("protobuf/api.proto", fileDescriptor_api_c4b1180d2ab7905e) }
