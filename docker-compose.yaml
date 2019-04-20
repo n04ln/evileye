@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+    evileye:
+        container_name: evileye
+        image: noahorberg/evileye:latest
+        ports:
+            - 50051:50051
+        # environment:
+        #     KEY: VAL
