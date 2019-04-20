@@ -1,0 +1,18 @@
+/* Copyright (c) 2018 MEGUMI Authors. All Rights Reserved. */
+
+syntax = "proto3";
+package evileye;
+
+import "google/protobuf/empty.proto";
+
+message Tarekomi {
+    int64 target_user_id = 1;
+    string url = 3;
+    string desc = 4;
+}
+
+message User {
+    int64 user_id = 1;
+    string user_name = 2;
+    repeated Tarekomi tarekomis = 3;
+}

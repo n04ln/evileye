@@ -1,0 +1,111 @@
+/* Copyright (c) 2018 MEGUMI Authors. All Rights Reserved. */
+
+syntax = "proto3";
+package evileye;
+
+import "google/protobuf/empty.proto";
+import "entity.proto";
+
+
+// rpc Req & Res
+message TarekomiReq {
+    Tarekomi tarekomi = 1;
+}
+
+message VoteReq {
+    int64 tarekomi_id = 1;
+    string desc = 2;
+}
+
+message TarekomiBoardReq {
+    int64 limit = 1;
+    int64 offset = 2;
+}
+
+message TarekomiSummary {
+    Tarekomi tarekomi = 1;
+    string user_name = 2;
+}
+
+message TarekomiSummaries {
+    repeated TarekomiSummary tarekomis = 1;
+}
+
+message TarekomiBoardRes {
+    repeated TarekomiSummary tarekomis = 1;
+}
+
+message UserInfoReq {
+    int64 user_name = 1;
+}
+
+message GetUserListReq {
+    int64 limit = 1;
+    int64 offset = 2;
+}
+
+message Users {
+    repeated User users = 1;
+}
+
+message AddStarReq {
+    int64 tarekomi_id = 1;
+}
+
+service Private {
+    /*
+        Tarekomi
+
+        Tarekomi returns some status
+            Invalid      ... invalid parameter
+            Internal     ... an error occured in the server
+            Unauthorized ... JWT is invalid
+        タレコミをする
+     */
+    rpc Tarekomi(TarekomiReq) returns (google.protobuf.Empty);
+
+    /*
+        Vote
+        
+        投票は、匿名で行う
+        descは、投票が完了して、ユーザ画面で表示される際には誰が投票したかは伏せて公開する
+     */
+    rpc Vote(VoteReq) returns (google.protobuf.Empty);
+
+    /*
+        TarekomiBoard
+
+        投票待ちのタレコミを表示する
+     */ 
+    rpc TarekomiBoard(TarekomiBoardReq) returns (TarekomiBoardRes);
+
+    /*
+        GetUserInfo
+
+        ユーザの情報を返す
+     */
+    rpc GetUserInfo(UserInfoReq) returns (User);
+
+    /*
+        GetUserList
+
+        ユーザ一覧を返す
+     */
+    rpc GetUserList(GetUserListReq) returns (Users);
+
+    /*
+        AddStar
+
+        タレコミにStarをつける
+        Approve済みのものだけ可能
+     */
+    rpc AddStar(AddStarReq) returns (google.protobuf.Empty);
+
+    /*
+        GetStaredTarekomi
+
+        自分のスターしたタレコミ一覧
+        JWTからユーザ情報を取得する
+     */
+    rpc GetStaredTarekomi(google.protobuf.Empty) returns (TarekomiSummaries);
+}
