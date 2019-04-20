@@ -1,3 +1,6 @@
+databasefile := data.sqlite3
+schemafile := schema/schema.sql
+
 proto:
 	protoc --proto_path=${GOPATH}/src:. --go_out=plugins=grpc:./ ./protobuf/api.proto
 
@@ -15,3 +18,7 @@ docker-compose: docker
 	docker-compose down
 	docker-compose up
 
+reset-db:
+	-[ -e ${databasefile} ] && rm -rf ${databasefile}
+	touch ${databasefile}
+	cat ${schemafile} | sqlite3 ${databasefile} 
