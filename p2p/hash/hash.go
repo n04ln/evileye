@@ -1,4 +1,4 @@
-package hash
+package p2phash
 
 import (
 	"bytes"
@@ -13,9 +13,29 @@ func init() {
 
 var rs1Letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-// GenerateNonce ... ハッシュ計算のためのナンスを雑に作る
+// BackgroundTask includes repository and clients information
+type BackgroundTask struct {
+	// repo *repository.Block // TODO: define it
+	// clis // TODO: define it
+}
+
+// Do calculate Hash in background
+// if it is success, then broadcast it using `SuccessHashCalc` to all nodes.
+// NOTE: Should do `go b.Do()` in main function
+func (b *BackgroundTask) Do() {
+	for {
+		nonce := generateNonce(rand.Intn(6))   // NOTE: 6 is default, can change it but if it is large, calclation is to slow.
+		prevHash := ""                         // TODO: get prevHash using repository in receiver
+		if canGenerateBlock(prevHash, nonce) { // TODO: replace empty string to prevHash
+			// TODO: Broadcast using SuccessHashCalc to all nodes. and generate UUID for requestID here.
+		}
+		time.Sleep(1 * time.Millisecond) // NOTE: sloppy sleep
+	}
+}
+
+// generateNonce ... ハッシュ計算のためのナンスを雑に作る
 // 引数でNonceの文字列長を指定できる
-func GenerateNonce(n int) string {
+func generateNonce(n int) string {
 	b := []byte{}
 	for i := 0; i < n; i++ {
 		b = append(b, rs1Letters[rand.Intn(len(rs1Letters))])
@@ -23,9 +43,9 @@ func GenerateNonce(n int) string {
 	return string(b)
 }
 
-// CanGenerateBlock ... ハッシュ計算をして、ブロックが作れるかどうかを見る
+// canGenerateBlock ... ハッシュ計算をして、ブロックが作れるかどうかを見る
 // この関数がTRUEを返したら、見事ブロックを作成する権利が得られる
-func CanGenerateBlock(prevHash, nonce string) bool {
+func canGenerateBlock(prevHash, nonce string) bool {
 	// このなかのいづれかが含まれればよい
 	parts := []string{
 		"HEI",
