@@ -4,13 +4,11 @@ import (
 	"context"
 	"log"
 	"net"
-	"strconv"
 
+	"github.com/NoahOrberg/evileye/grpcauth"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -25,16 +23,18 @@ var (
 // server is used to implement helloworld.GreeterServer.
 type server struct{}
 
-func (s *server) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
-	hash, buildatstr := CheckHealth(c)
-	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
+// impl --> public_health.go
 
-	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid unixtime")
-	}
+// func (s *server) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
+// 	hash, buildatstr := checkHealth(c)
+// 	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
 
-	return &pb.HealthCheckRes{CommitHash: hash, BuildTime: buildatunix}, nil
-}
+// 	if err != nil {
+// 		return nil, status.Error(codes.Internal, "invalid unixtime")
+// 	}
+
+// 	return &pb.HealthCheckRes{CommitHash: hash, BuildTime: buildatunix}, nil
+// }
 
 func (s *server) Tarekomi(ctx context.Context, in *pb.TarekomiReq) (*empty.Empty, error) {
 	panic("not impl")
@@ -64,16 +64,24 @@ func (s *server) GetStaredTarekomi(ctx context.Context, in *empty.Empty) (*pb.Ta
 	panic("not impl")
 }
 
-func CheckHealth(c context.Context) (string, string) {
-	return commitHash, buildTime
-}
+// func checkHealth(c context.Context) (string, string) {
+// 	return commitHash, buildTime
+// }
 
 func main() {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpcauth.UnaryServerInterceptor(
+				grpcauth.UserAuth(),
+			),
+		),
+	)
+
 	pb.RegisterPrivateServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
