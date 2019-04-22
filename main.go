@@ -5,9 +5,13 @@ import (
 	"net"
 	"strconv"
 
+	"github.com/NoahOrberg/evileye/infra/repository"
 	"github.com/NoahOrberg/evileye/log"
+	p2phash "github.com/NoahOrberg/evileye/p2p/hash"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -90,6 +94,23 @@ func main() {
 	pb.RegisterPrivateServer(s, &server{})
 	log.L().Info(
 		"register server, serve it!")
+
+	driverName := "sqlite3"
+	dbPath := "./data.sqlite3"
+	db, err := sqlx.Open(driverName, dbPath) // TODO: maybe path is invalid in container.
+	if err != nil {
+		log.L().Fatal("cannot open DB",
+			zap.Error(err),
+			zap.String("driverName", driverName),
+			zap.String("dbPath", dbPath),
+		)
+	}
+	blockRepo := repository.NewBlocksRepository(db)
+	bTask, err := p2phash.NewBackgroundTask(nil, blockRepo) // TODO: fill it
+	if err != nil {
+		log.L().Fatal("cannot create BackgroundTask")
+	}
+	go bTask.Do() // NOTE: this task is calc hash infinity :)
 
 	if err := s.Serve(lis); err != nil {
 		log.L().Fatal("failed to serve", zap.Error(err))
