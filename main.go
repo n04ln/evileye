@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"log"
 	"net"
 	"strconv"
 
+	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/golang/protobuf/ptypes/empty"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -71,11 +72,19 @@ func CheckHealth(c context.Context) (string, string) {
 func main() {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.L().Fatal("failed to listen", zap.Error(err))
 	}
+	log.L().Info(
+		"success net.Listen()",
+		zap.String("protocol", "tcp"),
+		zap.String("port", port))
+
 	s := grpc.NewServer()
 	pb.RegisterPrivateServer(s, &server{})
+	log.L().Info(
+		"register server, serve it!")
+
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.L().Fatal("failed to serve", zap.Error(err))
 	}
 }
