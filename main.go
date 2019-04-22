@@ -26,17 +26,6 @@ var (
 // server is used to implement helloworld.GreeterServer.
 type server struct{}
 
-func (s *server) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
-	hash, buildatstr := CheckHealth(c)
-	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
-
-	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid unixtime")
-	}
-
-	return &pb.HealthCheckRes{CommitHash: hash, BuildTime: buildatunix}, nil
-}
-
 func (s *server) Tarekomi(ctx context.Context, in *pb.TarekomiReq) (*empty.Empty, error) {
 	panic("not impl")
 }
@@ -65,6 +54,23 @@ func (s *server) GetStaredTarekomi(ctx context.Context, in *empty.Empty) (*pb.Ta
 	panic("not impl")
 }
 
+type pubServer struct{}
+
+func (p *pubServer) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
+	hash, buildatstr := CheckHealth(c)
+	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, "invalid unixtime")
+	}
+
+	return &pb.HealthCheckRes{CommitHash: hash, BuildTime: buildatunix}, nil
+}
+
+func (p *pubServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginRes, error) {
+	panic("not impl yet")
+}
+
 func CheckHealth(c context.Context) (string, string) {
 	return commitHash, buildTime
 }
@@ -80,6 +86,7 @@ func main() {
 		zap.String("port", port))
 
 	s := grpc.NewServer()
+	pb.RegisterPublicServer(s, &pubServer{})
 	pb.RegisterPrivateServer(s, &server{})
 	log.L().Info(
 		"register server, serve it!")
