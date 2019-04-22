@@ -5,10 +5,11 @@ CREATE TABLE `users` (
 );
 
 CREATE TABLE `blocks` (
-    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-    `prevhash` VARCHAR(256) NOT NULL,
-    `data` VARCHAR(1024), -- TODO: tarekomiとうまくリンクさせる
-    `hash` VARCHAR(256) NOT NULL
+    `id` integer primary key autoincrement,
+    `prevhash` varchar(256) not null,
+    `data` varchar(1024), -- todo: tarekomiとうまくリンクさせる
+    `create_time` integer, -- unix time
+    `hash` varchar(256) -- NOTE: これは確認用
 );
 
 CREATE TABLE `tarekomi` (
@@ -31,4 +32,8 @@ CREATE TABLE `stars` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `userid` INTEGER NOT NULL,
     `tarekomiid` INTEGER NOT NULL
-)
+);
+
+-- provisioning
+INSERT INTO `blocks`(prevhash, create_time, data, hash) VALUES('initial', 0, '{}', 'ac1b5c0961a7269b6a053ee64276ed0e20a7f48aefb9f67519539d23aaf10149');
+
