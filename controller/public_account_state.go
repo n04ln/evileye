@@ -7,24 +7,13 @@ import (
 
 	"github.com/NoahOrberg/evileye/middleware"
 	pb "github.com/NoahOrberg/evileye/protobuf"
-	"github.com/NoahOrberg/evileye/usecase"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-type PublicAccountStateHandler struct {
-	UUsecase usecase.ServerUserUsecase
-}
-
-func NewPublicUserHandler(su usecase.ServerUserUsecase) *PublicAccountStateHandler {
-	return &PublicAccountStateHandler{
-		UUsecase: su,
-	}
-}
-
-func (pas *PublicAccountStateHandler) Login(c context.Context, loginreq *pb.LoginRequest) (*pb.LoginRes, error) {
-	u, err := pas.UUsecase.UserGetByName(c, loginreq.ScreenName)
+func (psh *PublicServerHandler) Login(c context.Context, loginreq *pb.LoginRequest) (*pb.LoginRes, error) {
+	u, err := psh.UUsecase.UserGetByName(c, loginreq.ScreenName)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "user name or password not match")
 	}

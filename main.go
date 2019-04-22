@@ -73,11 +73,6 @@ func (s *server) GetStaredTarekomi(ctx context.Context, in *empty.Empty) (*pb.Ta
 // 	return commitHash, buildTime
 // }
 
-type PbServer struct {
-	State  func(context.Context, *pb.LoginRequest) (*pb.LoginRes, error)
-	Health func(context.Context, *empty.Empty) (*pb.HealthCheckRes, error)
-}
-
 func main() {
 
 	db, err := sqlx.Open("sqlite3", "data.sqlite3")
@@ -89,13 +84,7 @@ func main() {
 
 	puus := usecase.NewUserUsecase(pur, 100*time.Second)
 
-	publicCheckHealthhandler := controller.NewPublicCheckHealthHandler()
-	publicAccountHandler := controller.NewPublicUserHandler(puus)
-
-	pub := &PbServer{
-		State:  publicAccountHandler.Login,
-		Health: publicCheckHealthhandler.HealthCheck,
-	}
+	publicServerHandler := controller.NewPublicServerHandler(puus)
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -111,9 +100,7 @@ func main() {
 	)
 
 	pb.RegisterPrivateServer(s, &server{})
-	// pb.RegisterPublicServer(s, publicCheckHealthhandler)
-	// pb.RegisterPublicServer(s, publicAccountHandler)
-	pb.RegisterPublicServer(s, pub)
+	pb.RegisterPublicServer(s, publicServerHandler)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

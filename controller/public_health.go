@@ -18,15 +18,11 @@ var (
 type PublicCheckHealthHandler struct {
 }
 
-func NewPublicCheckHealthHandler() *PublicCheckHealthHandler {
-	return &PublicCheckHealthHandler{}
-}
-
 func checkHealth(c context.Context) (string, string) {
 	return commitHash, buildTime
 }
 
-func (pch *PublicCheckHealthHandler) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
+func (psh *PublicServerHandler) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
 	hash, buildatstr := checkHealth(c)
 	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
 
