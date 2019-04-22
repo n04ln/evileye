@@ -1,4 +1,4 @@
-package models
+package entity
 
 type Tarekomi struct {
 	ID          int64  `db:"id"`

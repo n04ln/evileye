@@ -4,10 +4,15 @@ import (
 	"context"
 	"log"
 	"net"
+	"time"
 
+	"github.com/NoahOrberg/evileye/controller"
 	"github.com/NoahOrberg/evileye/grpcauth"
 	pb "github.com/NoahOrberg/evileye/protobuf"
+	"github.com/NoahOrberg/evileye/repository"
+	"github.com/NoahOrberg/evileye/usecase"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc"
 )
 
@@ -68,7 +73,30 @@ func (s *server) GetStaredTarekomi(ctx context.Context, in *empty.Empty) (*pb.Ta
 // 	return commitHash, buildTime
 // }
 
+type PbServer struct {
+	State  func(context.Context, *pb.LoginRequest) (*pb.LoginRes, error)
+	Health func(context.Context, *empty.Empty) (*pb.HealthCheckRes, error)
+}
+
 func main() {
+
+	db, err := sqlx.Open("sqlite3", "data.sqlite3")
+	if err != nil {
+		panic(err)
+	}
+
+	pur := repository.NewSqliteUserRepository(db)
+
+	puus := usecase.NewUserUsecase(pur, 100*time.Second)
+
+	publicCheckHealthhandler := controller.NewPublicCheckHealthHandler()
+	publicAccountHandler := controller.NewPublicUserHandler(puus)
+
+	pub := &PbServer{
+		State:  publicAccountHandler.Login,
+		Health: publicCheckHealthhandler.HealthCheck,
+	}
+
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -83,6 +111,9 @@ func main() {
 	)
 
 	pb.RegisterPrivateServer(s, &server{})
+	// pb.RegisterPublicServer(s, publicCheckHealthhandler)
+	// pb.RegisterPublicServer(s, publicAccountHandler)
+	pb.RegisterPublicServer(s, pub)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

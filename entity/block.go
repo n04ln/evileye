@@ -1,4 +1,4 @@
-package models
+package entity
 
 type Block struct {
 	ID       int64  `db:"id"`

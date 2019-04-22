@@ -7,6 +7,7 @@ import (
 
 	"github.com/NoahOrberg/evileye/meta"
 	jwt "github.com/dgrijalva/jwt-go"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -18,18 +19,21 @@ var (
 func UserAuth() DefaultAuthenticateFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		token, err := meta.GetAuthorizationKey(ctx)
+		logger, _ := zap.NewDevelopment()
 		if err != nil {
-			return nil, status.Error(codes.FailedPrecondition, "")
+			logger.Info("Auth GetAuthorizationKey error", zap.Error(err))
+			return nil, status.Error(codes.FailedPrecondition, "cannnot get token from metadata")
 		}
 
 		// TODO: JWT secret を設定する
 		ui, err := GetUserFromJWT(token, "")
 		if err != nil {
+			logger.Info("Auth GetUserFromJWT error", zap.Error(err))
 			return nil, status.Error(codes.Unauthenticated, err.Error())
 		}
 
 		if ui.ExpiredAt < time.Now().Unix() {
-			return nil, status.Error(codes.DeadlineExceeded, "timeout")
+			return nil, status.Error(codes.Unauthenticated, "timeout")
 		}
 
 		ctx = context.WithValue(ctx, contextKey, ui)

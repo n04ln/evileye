@@ -10,5 +10,9 @@ type PrivateUserHandler struct {
 }
 
 func (puh *PrivateUserHandler) GetUserInfo(c context.Context, uinforeq *pb.UserInfoReq) (*pb.User, error) {
-	return nil, nil
+	panic("not impl")
+}
+
+func (puh *PrivateUserHandler) GetUserList(c context.Context, userlistreq *pb.GetUserListReq) (*pb.User, error) {
+	panic("not impl")
 }
