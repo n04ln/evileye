@@ -21,11 +21,17 @@ func NewUserUsecase(ur repository.UserRepository, ct time.Duration) ServerUserUs
 }
 
 func (u *ServerUserUsecaseImpl) UserGetByID(c context.Context, id int64) (*entity.User, error) {
-	panic("not impl")
+	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
+	defer cancel()
+
+	return u.userRepo.UserGetByID(ctx, id)
 }
 
-func (u *ServerUserUsecaseImpl) UserGetByIDList(c context.Context, ids []int64) ([]entity.User, error) {
-	panic("not impl")
+func (u *ServerUserUsecaseImpl) UserGetByIDList(c context.Context, limit, offset int64) ([]entity.User, error) {
+	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
+	defer cancel()
+
+	return u.userRepo.UserGetByIDList(ctx, limit, offset)
 }
 
 func (u *ServerUserUsecaseImpl) UserGetByName(c context.Context, uname string) (*entity.User, error) {
@@ -35,6 +41,9 @@ func (u *ServerUserUsecaseImpl) UserGetByName(c context.Context, uname string) (
 	return u.userRepo.UserGetByName(ctx, uname)
 }
 
-func (u *ServerUserUsecaseImpl) Store(c context.Context, usr *entity.User) error {
-	panic("not impl")
+func (u *ServerUserUsecaseImpl) Store(c context.Context, usr *entity.User) (*entity.User, error) {
+	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
+	defer cancel()
+
+	return u.userRepo.Store(ctx, usr)
 }
