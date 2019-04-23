@@ -15,13 +15,13 @@ import (
 func (psh *PublicServerHandler) Login(c context.Context, loginreq *pb.LoginRequest) (*pb.LoginRes, error) {
 	u, err := psh.UUsecase.UserGetByName(c, loginreq.ScreenName)
 	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, "user name or password not match")
+		return nil, status.Error(codes.Unauthenticated, "user name not match")
 	}
 
 	ok := isCorrectPassword(u.Password, loginreq.Password)
 
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "user name or password not match")
+		return nil, status.Error(codes.Unauthenticated, "user password not match")
 	}
 
 	// TODO: jwt token secret は後で設定する
@@ -34,7 +34,7 @@ func (psh *PublicServerHandler) Login(c context.Context, loginreq *pb.LoginReque
 }
 
 func encryptPassword(s string) []byte {
-	salt := "" // TODO: あとで設定する
+	salt := "chu2byo" // TODO: あとで設定する
 	raw := []byte(s)
 
 	res := sha256.Sum256(append(raw, salt...))
