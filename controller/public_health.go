@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	pb "github.com/NoahOrberg/evileye/protobuf"
-	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -22,7 +21,7 @@ func checkHealth(c context.Context) (string, string) {
 	return commitHash, buildTime
 }
 
-func (psh *PublicServerHandler) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
+func (psh *PublicServerHandler) HealthCheck(c context.Context, e *pb.Empty) (*pb.HealthCheckRes, error) {
 	hash, buildatstr := checkHealth(c)
 	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
 

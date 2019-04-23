@@ -7,7 +7,12 @@ option java_outer_classname = "EeProto";
 
 package evileye;
 
-import "google/protobuf/empty.proto";
+// NOTE: define empty message
+//       coz protobuf-java-lite is recommended by Google Android development
+//       but it not support Empty.
+//  ref:  https://github.com/protocolbuffers/protobuf/issues/4314
+//        https://github.com/protocolbuffers/protobuf/issues/5556 
+message Empty {}
 
 message Tarekomi {
     int64 target_user_id = 1;
@@ -85,7 +90,7 @@ service Public {
 
         ヘルスチェック用
      */
-    rpc HealthCheck(google.protobuf.Empty) returns (HealthCheckRes);
+    rpc HealthCheck(Empty) returns (HealthCheckRes);
     
     /*
         Login
@@ -107,7 +112,7 @@ service Private {
             Unauthorized ... JWT is invalid
         タレコミをする
      */
-    rpc Tarekomi(TarekomiReq) returns (google.protobuf.Empty);
+    rpc Tarekomi(TarekomiReq) returns (Empty);
 
     /*
         Vote
@@ -115,7 +120,7 @@ service Private {
         投票は、匿名で行う
         descは、投票が完了して、ユーザ画面で表示される際には誰が投票したかは伏せて公開する
      */
-    rpc Vote(VoteReq) returns (google.protobuf.Empty);
+    rpc Vote(VoteReq) returns (Empty);
 
     /*
         TarekomiBoard
@@ -144,7 +149,7 @@ service Private {
         タレコミにStarをつける
         Approve済みのものだけ可能
      */
-    rpc AddStar(AddStarReq) returns (google.protobuf.Empty);
+    rpc AddStar(AddStarReq) returns (Empty);
 
     /*
         GetStaredTarekomi
@@ -152,5 +157,5 @@ service Private {
         自分のスターしたタレコミ一覧
         JWTからユーザ情報を取得する
      */
-    rpc GetStaredTarekomi(google.protobuf.Empty) returns (TarekomiSummaries);
+    rpc GetStaredTarekomi(Empty) returns (TarekomiSummaries);
 }

@@ -1,2 +1,4 @@
+client/
+vendor/
 bin/
 data.sqlite3
