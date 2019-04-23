@@ -3,11 +3,14 @@ package grpcauth
 import (
 	"context"
 	"errors"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/NoahOrberg/evileye/meta"
 	jwt "github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -18,6 +21,14 @@ var (
 
 func UserAuth() DefaultAuthenticateFunc {
 	return func(ctx context.Context) (context.Context, error) {
+
+		method, _ := grpc.Method(ctx)
+		service, _ := filepath.Split(method)
+
+		if strings.HasSuffix(service, "Public/") {
+			return ctx, nil
+		}
+
 		token, err := meta.GetAuthorizationKey(ctx)
 		logger, _ := zap.NewDevelopment()
 		if err != nil {
