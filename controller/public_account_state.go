@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
+	"log"
 
 	"github.com/NoahOrberg/evileye/middleware"
 	pb "github.com/NoahOrberg/evileye/protobuf"
@@ -43,6 +45,8 @@ func encryptPassword(s string) []byte {
 
 func isCorrectPassword(encripted []byte, rawpw string) bool {
 	enc := encryptPassword(rawpw)
+
+	log.Println(hex.EncodeToString(enc))
 
 	return bytes.Equal(encripted, enc)
 }

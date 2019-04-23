@@ -16,7 +16,7 @@ func NewSqliteUserRepository(db *sqlx.DB) UserRepository {
 }
 
 func (r *sqliteUserRepository) UserGetByID(ctx context.Context, id int64) (*entity.User, error) {
-	qstr := `SELECT * FROM user WHERE id = ?`
+	qstr := `SELECT * FROM users WHERE id = ?`
 	u := new(entity.User)
 
 	if err := r.db.Get(u, qstr, id); err != nil {
@@ -27,7 +27,7 @@ func (r *sqliteUserRepository) UserGetByID(ctx context.Context, id int64) (*enti
 }
 
 func (r *sqliteUserRepository) UserGetByIDList(ctx context.Context, limit, offset int64) ([]entity.User, error) {
-	qstr := `SELECT * FROM user ORDER By id LIMIT ? OFFSET ?`
+	qstr := `SELECT * FROM users ORDER By id LIMIT ? OFFSET ?`
 	us := make([]entity.User, 0, limit)
 
 	rows, err := r.db.Query(qstr, limit, offset)
@@ -52,7 +52,7 @@ func (r *sqliteUserRepository) UserGetByIDList(ctx context.Context, limit, offse
 
 func (r *sqliteUserRepository) UserGetByName(ctx context.Context, uname string) (*entity.User, error) {
 
-	qstr := `SELECT * FROM user WHERE screenname = ?`
+	qstr := `SELECT * FROM users WHERE screenname = ?`
 	u := new(entity.User)
 
 	if err := r.db.Get(u, qstr, uname); err != nil {
