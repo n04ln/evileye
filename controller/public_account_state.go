@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"log"
 
-	"github.com/NoahOrberg/evileye/middleware"
+	"github.com/NoahOrberg/evileye/jwt"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 
 	"google.golang.org/grpc/codes"
@@ -28,7 +28,7 @@ func (psh *PublicServerHandler) Login(c context.Context, loginreq *pb.LoginReque
 	}
 
 	// TODO: jwt token secret は後で設定する
-	token, err := middleware.CreateJWTToken(*u, "")
+	token, err := jwt.CreateJWTToken(*u, "")
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "cannnot set jwt token")
 	}

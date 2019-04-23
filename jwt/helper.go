@@ -1,6 +1,7 @@
-package middleware
+package jwt
 
 import (
+	"errors"
 	"time"
 
 	"github.com/NoahOrberg/evileye/entity"
@@ -28,4 +29,17 @@ func CreateJWTToken(u entity.User, secret string) (string, error) {
 	}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), jwtModel)
 	return token.SignedString([]byte(secret))
+}
+
+func GetUserInfoFromJWT(token string, secret string) (*UserInfo, error) {
+	var u UserJWT
+	_, err := jwt.ParseWithClaims(
+		token, &u, func(token *jwt.Token) (interface{}, error) {
+			return []byte(secret), nil
+		})
+	if err != nil {
+		return nil, errors.New("failed to get username from jwt")
+	}
+
+	return &u.UserInfo, nil
 }

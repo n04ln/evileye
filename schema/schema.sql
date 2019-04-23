@@ -32,4 +32,6 @@ CREATE TABLE `stars` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `userid` INTEGER NOT NULL,
     `tarekomiid` INTEGER NOT NULL
-)
+);
+
+INSERT INTO users(screenname, password) VALUES('shinka', 'morisama');

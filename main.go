@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/NoahOrberg/evileye/controller"
-	"github.com/NoahOrberg/evileye/grpcauth"
+	"github.com/NoahOrberg/evileye/interceptor"
 	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/NoahOrberg/evileye/repository"
@@ -114,9 +114,7 @@ func main() {
 
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(
-			grpcauth.UnaryServerInterceptor(
-				grpcauth.UserAuth(),
-			),
+			interceptor.WithJWT,
 		),
 	)
 
