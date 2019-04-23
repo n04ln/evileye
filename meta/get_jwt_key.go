@@ -3,9 +3,11 @@ package meta
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -19,6 +21,8 @@ func GetAuthorizationKey(ctx context.Context) (string, error) {
 }
 
 func fromMeta(ctx context.Context, key string) (string, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	log.Println(md)
 	vs, ok := ctx.Value(authHeader).(string)
 	if !ok {
 		return "", status.Error(codes.FailedPrecondition, "invalid authorization key")

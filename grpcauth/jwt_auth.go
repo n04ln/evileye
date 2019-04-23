@@ -3,6 +3,7 @@ package grpcauth
 import (
 	"context"
 	"errors"
+	"log"
 	"path/filepath"
 	"strings"
 	"time"
@@ -30,6 +31,7 @@ func UserAuth() DefaultAuthenticateFunc {
 		}
 
 		token, err := meta.GetAuthorizationKey(ctx)
+		log.Println(token)
 		logger, _ := zap.NewDevelopment()
 		if err != nil {
 			logger.Info("Auth GetAuthorizationKey error", zap.Error(err))

@@ -58,7 +58,7 @@ func (s *server) TarekomiBoard(ctx context.Context, in *pb.TarekomiBoardReq) (*p
 }
 
 func (s *server) GetUserInfo(ctx context.Context, in *pb.UserInfoReq) (*pb.User, error) {
-	panic("not impl")
+	return &pb.User{UserId: in.UserName}, nil
 }
 
 func (s *server) GetUserList(ctx context.Context, in *pb.GetUserListReq) (*pb.Users, error) {
