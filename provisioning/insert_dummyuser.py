@@ -13,7 +13,8 @@ pw = rawPassword.encode()+salt.encode()
 
 encripted = hashlib.sha256(pw).hexdigest()
 
-dummyuser = (userName, encripted)
+#dummyuser = (userName, encripted)
+dummyuser = (userName, rawPassword)
 
 c.execute('INSERT INTO users(screenname, password) VALUES(?, ?)', dummyuser)
 

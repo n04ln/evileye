@@ -1,7 +1,8 @@
 CREATE TABLE `users` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `screenname` VARCHAR(32) NOT NULL,
-    `password` BLOB NOT NULL
+    -- `password` BLOB NOT NULL
+    `password` VARCHAR(32) NOT NULL
 );
 
 CREATE TABLE `blocks` (
