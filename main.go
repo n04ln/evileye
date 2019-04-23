@@ -7,7 +7,6 @@ import (
 
 	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
-	"github.com/golang/protobuf/ptypes/empty"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -26,11 +25,11 @@ var (
 // server is used to implement helloworld.GreeterServer.
 type server struct{}
 
-func (s *server) Tarekomi(ctx context.Context, in *pb.TarekomiReq) (*empty.Empty, error) {
+func (s *server) Tarekomi(ctx context.Context, in *pb.TarekomiReq) (*pb.Empty, error) {
 	panic("not impl")
 }
 
-func (s *server) Vote(ctx context.Context, in *pb.VoteReq) (*empty.Empty, error) {
+func (s *server) Vote(ctx context.Context, in *pb.VoteReq) (*pb.Empty, error) {
 	panic("not impl")
 }
 
@@ -46,17 +45,17 @@ func (s *server) GetUserList(ctx context.Context, in *pb.GetUserListReq) (*pb.Us
 	panic("not impl")
 }
 
-func (s *server) AddStar(ctx context.Context, in *pb.AddStarReq) (*empty.Empty, error) {
+func (s *server) AddStar(ctx context.Context, in *pb.AddStarReq) (*pb.Empty, error) {
 	panic("not impl")
 }
 
-func (s *server) GetStaredTarekomi(ctx context.Context, in *empty.Empty) (*pb.TarekomiSummaries, error) {
+func (s *server) GetStaredTarekomi(ctx context.Context, in *pb.Empty) (*pb.TarekomiSummaries, error) {
 	panic("not impl")
 }
 
 type pubServer struct{}
 
-func (p *pubServer) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
+func (p *pubServer) HealthCheck(c context.Context, e *pb.Empty) (*pb.HealthCheckRes, error) {
 	hash, buildatstr := CheckHealth(c)
 	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
 
