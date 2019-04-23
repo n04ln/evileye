@@ -1,9 +1,8 @@
 package main
 
 import (
-	"context"
 	"net"
-	"strconv"
+	"os"
 	"time"
 
 	"github.com/NoahOrberg/evileye/controller"
@@ -16,8 +15,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -32,71 +29,9 @@ var (
 // server is used to implement helloworld.GreeterServer.
 type server struct{}
 
-// impl --> public_health.go
-
-// func (s *server) HealthCheck(c context.Context, e *empty.Empty) (*pb.HealthCheckRes, error) {
-// 	hash, buildatstr := checkHealth(c)
-// 	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
-
-// 	if err != nil {
-// 		return nil, status.Error(codes.Internal, "invalid unixtime")
-// 	}
-
-// 	return &pb.HealthCheckRes{CommitHash: hash, BuildTime: buildatunix}, nil
-// }
-
-func (s *server) Tarekomi(ctx context.Context, in *pb.TarekomiReq) (*pb.Empty, error) {
-	panic("not impl")
-}
-
-func (s *server) Vote(ctx context.Context, in *pb.VoteReq) (*pb.Empty, error) {
-	panic("not impl")
-}
-
-func (s *server) TarekomiBoard(ctx context.Context, in *pb.TarekomiBoardReq) (*pb.TarekomiBoardRes, error) {
-	panic("not impl")
-}
-
-func (s *server) GetUserInfo(ctx context.Context, in *pb.UserInfoReq) (*pb.User, error) {
-	return &pb.User{UserId: in.UserName}, nil
-}
-
-func (s *server) GetUserList(ctx context.Context, in *pb.GetUserListReq) (*pb.Users, error) {
-	panic("not impl")
-}
-
-func (s *server) AddStar(ctx context.Context, in *pb.AddStarReq) (*pb.Empty, error) {
-	panic("not impl")
-}
-
-func (s *server) GetStaredTarekomi(ctx context.Context, in *pb.Empty) (*pb.TarekomiSummaries, error) {
-	panic("not impl")
-}
-
-type pubServer struct{}
-
-func (p *pubServer) HealthCheck(c context.Context, e *pb.Empty) (*pb.HealthCheckRes, error) {
-	hash, buildatstr := CheckHealth(c)
-	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
-
-	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid unixtime")
-	}
-
-	return &pb.HealthCheckRes{CommitHash: hash, BuildTime: buildatunix}, nil
-}
-
-func (p *pubServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginRes, error) {
-	panic("not impl yet")
-}
-
-func CheckHealth(c context.Context) (string, string) {
-	return commitHash, buildTime
-}
-
 func main() {
 
-	db, err := sqlx.Open("sqlite3", "data.sqlite3")
+	db, err := sqlx.Open("sqlite3", os.Getenv("DB_FILE"))
 	if err != nil {
 		panic(err)
 	}
@@ -105,7 +40,8 @@ func main() {
 
 	puus := usecase.NewUserUsecase(pur, 100*time.Second)
 
-	publicServerHandler := controller.NewPublicServerHandler(puus)
+	publicServer := controller.NewPublicServer(puus)
+	privServer := controller.NewPrivServer()
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -123,8 +59,8 @@ func main() {
 		zap.String("protocol", "tcp"),
 		zap.String("port", port))
 
-	pb.RegisterPublicServer(s, publicServerHandler)
-	pb.RegisterPrivateServer(s, &server{})
+	pb.RegisterPublicServer(s, publicServer)
+	pb.RegisterPrivateServer(s, privServer)
 	log.L().Info(
 		"register server, serve it!")
 

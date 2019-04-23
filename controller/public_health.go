@@ -14,14 +14,11 @@ var (
 	buildTime  string
 )
 
-type PublicCheckHealthHandler struct {
-}
-
 func checkHealth(c context.Context) (string, string) {
 	return commitHash, buildTime
 }
 
-func (psh *PublicServerHandler) HealthCheck(c context.Context, e *pb.Empty) (*pb.HealthCheckRes, error) {
+func (psh *publicServer) HealthCheck(c context.Context, e *pb.Empty) (*pb.HealthCheckRes, error) {
 	hash, buildatstr := checkHealth(c)
 	buildatunix, err := strconv.ParseUint(buildatstr, 10, 64)
 

@@ -4,23 +4,23 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
-	"encoding/hex"
-	"log"
 
 	"github.com/NoahOrberg/evileye/jwt"
+	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
+	"go.uber.org/zap"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (psh *PublicServerHandler) Login(c context.Context, loginreq *pb.LoginRequest) (*pb.LoginRes, error) {
+func (psh *publicServer) Login(c context.Context, loginreq *pb.LoginRequest) (*pb.LoginRes, error) {
 	u, err := psh.UUsecase.UserGetByName(c, loginreq.ScreenName)
 	if err != nil {
+		log.L().Error("UserGetByName failed", zap.Error(err))
 		return nil, status.Error(codes.Unauthenticated, "user name not match")
 	}
 
-	// ok := isCorrectPassword(u.Password, loginreq.Password)
 	ok := rawpasswdcomp(string(u.Password), loginreq.Password)
 
 	if !ok {
@@ -46,9 +46,6 @@ func encryptPassword(s string) []byte {
 
 func isCorrectPassword(encripted []byte, rawpw string) bool {
 	enc := encryptPassword(rawpw)
-
-	log.Println(hex.EncodeToString(enc))
-	log.Println(encripted)
 
 	return bytes.Equal(encripted, enc)
 }

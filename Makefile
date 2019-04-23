@@ -16,7 +16,10 @@ docker: build
 
 docker-compose: docker
 	docker-compose down
-	docker-compose up
+	docker-compose up -d
+	sleep 2
+	docker cp schema/ evileye:/
+	docker-compose exec evileye /bin/sh /schema/provisioning.sh /${schemafile} /${databasefile}
 
 reset-db:
 	-[ -e ${databasefile} ] && rm -rf ${databasefile}
