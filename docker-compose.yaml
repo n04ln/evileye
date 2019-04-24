@@ -3,8 +3,8 @@ version: "3"
 services:
     evileye:
         container_name: evileye
-        image: noahorberg/evileye:latest
+        image: ${EVIL_EYE_IMAGE}
         ports:
             - 50051:50051
         environment:
-            DB_FILE: "/data.sqlite3"
+            DB_FILE: ${DATABASEFILE}

@@ -6,11 +6,15 @@ import (
 )
 
 type publicServer struct {
-	UUsecase usecase.ServerUserUsecase
+	commitHash string
+	buildTime  string
+	UUsecase   usecase.ServerUserUsecase
 }
 
-func NewPublicServer(su usecase.ServerUserUsecase) pb.PublicServer {
+func NewPublicServer(commitHash, buildTime string, su usecase.ServerUserUsecase) pb.PublicServer {
 	return &publicServer{
-		UUsecase: su,
+		commitHash: commitHash,
+		buildTime:  buildTime,
+		UUsecase:   su,
 	}
 }

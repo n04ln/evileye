@@ -40,7 +40,7 @@ func main() {
 
 	puus := usecase.NewUserUsecase(pur, 100*time.Second)
 
-	publicServer := controller.NewPublicServer(puus)
+	publicServer := controller.NewPublicServer(commitHash, buildTime, puus)
 	privServer := controller.NewPrivServer()
 
 	lis, err := net.Listen("tcp", port)
