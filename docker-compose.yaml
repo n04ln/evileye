@@ -6,5 +6,5 @@ services:
         image: noahorberg/evileye:latest
         ports:
             - 50051:50051
-        # environment:
-        #     KEY: VAL
+        environment:
+            DB_FILE: "/data.sqlite3"
