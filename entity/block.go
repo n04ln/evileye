@@ -1,13 +1,13 @@
 package entity
 
 type Block struct {
-	Id         int64
-	Prevhash   string
-	Data       string
-	Hash       string
+	ID         int64  `db:"id"`
+	PrevHash   string `db:"prevhash"`
+	Data       string `db:"data"`
+	Hash       string `db:"hash"`
 	CreateTime int64
 }
 
-func (b Block) TableName() string {
+func (b *Block) TableName() string {
 	return "blocks"
 }

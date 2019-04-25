@@ -1,7 +1,8 @@
 CREATE TABLE `users` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `screenname` VARCHAR(32) NOT NULL,
-    `password` BLOB NOT NULL
+    -- `password` BLOB NOT NULL
+    `password` VARCHAR(32) NOT NULL
 );
 
 CREATE TABLE `blocks` (
@@ -34,6 +35,6 @@ CREATE TABLE `stars` (
     `tarekomiid` INTEGER NOT NULL
 );
 
--- provisioning
 INSERT INTO `blocks`(prevhash, create_time, data, hash) VALUES('initial', 0, '{}', 'ac1b5c0961a7269b6a053ee64276ed0e20a7f48aefb9f67519539d23aaf10149');
 
+INSERT INTO users(screenname, password) VALUES('shinka', 'morisama');
