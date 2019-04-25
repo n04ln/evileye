@@ -12,8 +12,8 @@ type SqliteVoteRepository struct {
 	db *sqlx.DB
 }
 
-func NewSqliteVoteRepository(db *sqlx.DB) *SqliteVoteRepository {
-	return &SqliteVoteRepository{db: db}
+func NewSqliteVoteRepository(db *sqlx.DB) SqliteVoteRepository {
+	return SqliteVoteRepository{db: db}
 }
 
 func checkVotes(ctx context.Context, tid int64, db *sqlx.DB) (bool, error) {
