@@ -151,3 +151,45 @@ func (r *sqliteTarekomiRepository) UpdateTarekomiState(ctx context.Context, newt
 
 	return newtarekomi, nil
 }
+
+func (r *sqliteTarekomiRepository) GetTarekomiFromID(ctx context.Context, tid int64) (pb.TarekomiSummary, error) {
+	qstr := `SELECT * FROM tarekomi WHERE id = ?`
+
+	rows, err := r.db.Query(qstr, tid)
+	if err != nil {
+		return pb.TarekomiSummary{}, err
+	}
+
+	tp := pb.TarekomiSummary{}
+
+	for rows.Next() {
+		t := entity.Tarekomi{}
+
+		if err := rows.Scan(
+			&t.ID,
+			&t.Status,
+			&t.Threshold,
+			&t.TargetUserID,
+			&t.URL,
+			&t.Description,
+		); err != nil {
+			return pb.TarekomiSummary{}, err
+		}
+
+		n, err := getUserByID(ctx, t.TargetUserID, r.db)
+		if err != nil {
+			return pb.TarekomiSummary{}, err
+		}
+
+		tp = pb.TarekomiSummary{
+			Tarekomi: &pb.Tarekomi{
+				TargetUserId: t.TargetUserID,
+				Url:          t.URL,
+				Desc:         t.Description,
+			},
+			UserName: n.ScreenName,
+		}
+	}
+
+	return tp, nil
+}

@@ -40,8 +40,11 @@ func main() {
 
 	puus := usecase.NewUserUsecase(pur, 100*time.Second)
 
+	tr := repository.NewSqliteTarekomiRepository(db)
+	sr := repository.NewSqliteStarRepository(db)
+
 	publicServer := controller.NewPublicServer(commitHash, buildTime, puus)
-	privServer := controller.NewPrivServer()
+	privServer := controller.NewPrivServer(tr, sr)
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

@@ -2,13 +2,17 @@ package controller
 
 import (
 	pb "github.com/NoahOrberg/evileye/protobuf"
-	"github.com/NoahOrberg/evileye/usecase"
+	"github.com/NoahOrberg/evileye/repository"
 )
 
 type privateServer struct {
-	TUsecase usecase.ServerTarekomiUsecase
+	TRepository repository.TarekomiRepository
+	SRepository repository.StarRepository
 }
 
-func NewPrivServer(tu usecase.ServerTarekomiUsecase) pb.PrivateServer {
-	return &privateServer{TUsecase: tu}
+func NewPrivServer(tr repository.TarekomiRepository, sr repository.StarRepository) pb.PrivateServer {
+	return &privateServer{
+		TRepository: tr,
+		SRepository: sr,
+	}
 }
