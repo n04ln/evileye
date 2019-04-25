@@ -43,9 +43,10 @@ func main() {
 	tr := repository.NewSqliteTarekomiRepository(db)
 	sr := repository.NewSqliteStarRepository(db)
 	vr := repository.NewSqliteVoteRepository(db)
+	ur := repository.NewSqliteUserRepository(db)
 
 	publicServer := controller.NewPublicServer(commitHash, buildTime, puus)
-	privServer := controller.NewPrivServer(tr, sr, vr)
+	privServer := controller.NewPrivServer(tr, sr, vr, ur)
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
