@@ -8,11 +8,13 @@ import (
 type privateServer struct {
 	TRepository repository.TarekomiRepository
 	SRepository repository.StarRepository
+	VRepository repository.SqliteVoteRepository
 }
 
-func NewPrivServer(tr repository.TarekomiRepository, sr repository.StarRepository) pb.PrivateServer {
+func NewPrivServer(tr repository.TarekomiRepository, sr repository.StarRepository, vr repository.SqliteVoteRepository) pb.PrivateServer {
 	return &privateServer{
 		TRepository: tr,
 		SRepository: sr,
+		VRepository: vr,
 	}
 }
