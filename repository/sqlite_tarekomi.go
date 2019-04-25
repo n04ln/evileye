@@ -9,7 +9,9 @@ import (
 )
 
 var (
-	PENDING = 0
+	PENDING  = 0
+	APPROVED = 1
+	REJECTED = 2
 )
 
 type sqliteTarekomiRepository struct {
@@ -139,7 +141,7 @@ func (r *sqliteTarekomiRepository) Store(ctx context.Context, t entity.Tarekomi)
 	return res.LastInsertId()
 }
 
-func (r *sqliteTarekomiRepository) UpdateTarekomi(ctx context.Context, newtarekomi entity.Tarekomi) (entity.Tarekomi, error) {
+func (r *sqliteTarekomiRepository) UpdateTarekomiState(ctx context.Context, newtarekomi entity.Tarekomi) (entity.Tarekomi, error) {
 	qstr := `UPDATE tarekomi SET state = ? WHERE id = ?`
 
 	_, err := r.db.Exec(qstr, newtarekomi.Status, newtarekomi.ID)
