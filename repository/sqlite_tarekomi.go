@@ -9,7 +9,9 @@ import (
 )
 
 var (
-	PENDING = 0
+	PENDING  = 0
+	APPROVED = 1
+	REJECTED = 2
 )
 
 type sqliteTarekomiRepository struct {
@@ -18,6 +20,17 @@ type sqliteTarekomiRepository struct {
 
 func NewSqliteTarekomiRepository(db *sqlx.DB) TarekomiRepository {
 	return &sqliteTarekomiRepository{db}
+}
+
+func UpdateTarekomiState(ctx context.Context, newtarekomi entity.Tarekomi, db *sqlx.DB) (entity.Tarekomi, error) {
+	qstr := `UPDATE tarekomi SET state = ? WHERE id = ?`
+
+	_, err := db.Exec(qstr, newtarekomi.Status, newtarekomi.ID)
+	if err != nil {
+		return newtarekomi, err
+	}
+
+	return newtarekomi, nil
 }
 
 func getUserByID(ctx context.Context, uid int64, db *sqlx.DB) (*entity.User, error) {
@@ -62,11 +75,16 @@ func (r *sqliteTarekomiRepository) GetTarekomiFromUser(ctx context.Context, id, 
 			return *ts, err
 		}
 
+		u1, err := getUserByID(ctx, t.ID, r.db)
+		if err != nil {
+			return *ts, err
+		}
+
 		tp := pb.TarekomiSummary{
 			Tarekomi: &pb.Tarekomi{
-				TargetUserId: t.TargetUserID,
-				Url:          t.URL,
-				Desc:         t.Description,
+				TargetUserName: u1.ScreenName,
+				Url:            t.URL,
+				Desc:           t.Description,
 			},
 			UserName: u.ScreenName,
 		}
@@ -112,9 +130,9 @@ func (r *sqliteTarekomiRepository) GetTarekomiBoard(ctx context.Context, limit, 
 
 		tp := pb.TarekomiSummary{
 			Tarekomi: &pb.Tarekomi{
-				TargetUserId: t.TargetUserID,
-				Url:          t.URL,
-				Desc:         t.Description,
+				TargetUserName: n.ScreenName,
+				Url:            t.URL,
+				Desc:           t.Description,
 			},
 			UserName: n.ScreenName,
 		}
@@ -139,7 +157,7 @@ func (r *sqliteTarekomiRepository) Store(ctx context.Context, t entity.Tarekomi)
 	return res.LastInsertId()
 }
 
-func (r *sqliteTarekomiRepository) UpdateTarekomi(ctx context.Context, newtarekomi entity.Tarekomi) (entity.Tarekomi, error) {
+func (r *sqliteTarekomiRepository) UpdateTarekomiState(ctx context.Context, newtarekomi entity.Tarekomi) (entity.Tarekomi, error) {
 	qstr := `UPDATE tarekomi SET state = ? WHERE id = ?`
 
 	_, err := r.db.Exec(qstr, newtarekomi.Status, newtarekomi.ID)
@@ -148,4 +166,46 @@ func (r *sqliteTarekomiRepository) UpdateTarekomi(ctx context.Context, newtareko
 	}
 
 	return newtarekomi, nil
+}
+
+func (r *sqliteTarekomiRepository) GetTarekomiFromID(ctx context.Context, tid int64) (pb.TarekomiSummary, error) {
+	qstr := `SELECT * FROM tarekomi WHERE id = ?`
+
+	rows, err := r.db.Query(qstr, tid)
+	if err != nil {
+		return pb.TarekomiSummary{}, err
+	}
+
+	tp := pb.TarekomiSummary{}
+
+	for rows.Next() {
+		t := entity.Tarekomi{}
+
+		if err := rows.Scan(
+			&t.ID,
+			&t.Status,
+			&t.Threshold,
+			&t.TargetUserID,
+			&t.URL,
+			&t.Description,
+		); err != nil {
+			return pb.TarekomiSummary{}, err
+		}
+
+		n, err := getUserByID(ctx, t.TargetUserID, r.db)
+		if err != nil {
+			return pb.TarekomiSummary{}, err
+		}
+
+		tp = pb.TarekomiSummary{
+			Tarekomi: &pb.Tarekomi{
+				TargetUserName: n.ScreenName,
+				Url:            t.URL,
+				Desc:           t.Description,
+			},
+			UserName: n.ScreenName,
+		}
+	}
+
+	return tp, nil
 }

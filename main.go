@@ -8,6 +8,7 @@ import (
 	"github.com/NoahOrberg/evileye/controller"
 	"github.com/NoahOrberg/evileye/interceptor"
 	"github.com/NoahOrberg/evileye/log"
+	p2pclient "github.com/NoahOrberg/evileye/p2p/client"
 	p2pserver "github.com/NoahOrberg/evileye/p2p/controller"
 	p2phash "github.com/NoahOrberg/evileye/p2p/hash"
 	pb "github.com/NoahOrberg/evileye/protobuf"
@@ -53,8 +54,18 @@ func main() {
 
 	puus := usecase.NewUserUsecase(pur, 100*time.Second)
 
+	tr := repository.NewSqliteTarekomiRepository(db)
+	sr := repository.NewSqliteStarRepository(db)
+	vr := repository.NewSqliteVoteRepository(db)
+	ur := repository.NewSqliteUserRepository(db)
+
+	ic, err := p2pclient.NewInternalClient()
+	if err != nil {
+		panic(err)
+	}
+
 	publicServer := controller.NewPublicServer(commitHash, buildTime, puus)
-	privServer := controller.NewPrivServer()
+	privServer := controller.NewPrivServer(tr, sr, vr, ur, ic)
 
 	port := os.Getenv("PORT")
 	lis, err := net.Listen("tcp", port)

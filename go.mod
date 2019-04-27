@@ -6,6 +6,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/k0kubun/pp v3.0.1+incompatible
+	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-sqlite3 v1.9.0
 	github.com/satori/go.uuid v1.2.0 // indirect
