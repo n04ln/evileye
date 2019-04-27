@@ -46,8 +46,13 @@ func main() {
 	vr := repository.NewSqliteVoteRepository(db)
 	ur := repository.NewSqliteUserRepository(db)
 
+	ic, err := p2phash.NewInternalClient()
+	if err != nil {
+		panic(err)
+	}
+
 	publicServer := controller.NewPublicServer(commitHash, buildTime, puus)
-	privServer := controller.NewPrivServer(tr, sr, vr, ur)
+	privServer := controller.NewPrivServer(tr, sr, vr, ur, ic)
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

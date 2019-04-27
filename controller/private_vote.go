@@ -19,7 +19,7 @@ func (pvh *privateServer) Vote(c context.Context, votereq *pb.VoteReq) (*pb.Empt
 		Description: votereq.Desc,
 	}
 
-	err := pvh.VRepository.NewVoting(c, nv)
+	err := pvh.VRepository.NewVoting(c, nv, pvh.IClient)
 	if err != nil {
 		return &pb.Empty{}, status.Error(codes.Internal, "Database down")
 	}
