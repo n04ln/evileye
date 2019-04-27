@@ -9,21 +9,27 @@ import (
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/NoahOrberg/evileye/repository"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/k0kubun/pp"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
+const (
+	leaderHost = "localhost:50051"
+)
+
 type p2pServer struct {
-	txPool []struct {
-		UserName string `json:"user_name"`
-		URL      string `json:"url"`
-	}
+	// リーダーノード用
+	txPool  []*pb.Tx // NOTE: とりあえずここにいれる
+	waitTxs []*pb.Tx // NOTE: SuccessHashCalcのタイミングでこっちに入れ直す
+
 	b    p2phash.BackgroundTask
 	repo repository.Blocks // TODO: define it
+
 	// NOTE: clis[0] is LEADER, So Arrays order must be same between each nodes.
-	clis            map[string]pb.InternalClient // NOTE: map[HOST]*Client
-	successHashCalc map[string]int64             // NOTE: MUST USE RWMutex
-	mux             sync.RWMutex
+	clis           map[string]pb.InternalClient // NOTE: map[HOST]*Client
+	successHashCnt map[string]int64             // NOTE: MUST USE RWMutex
+	mux            sync.RWMutex
 }
 
 // NewP2PServer is a constructor for p2p service. (for internal conversation)
@@ -39,11 +45,19 @@ func NewP2PServer(hosts []string) (pb.InternalServer, error) {
 	}
 
 	return &p2pServer{
-		clis: clis,
+		clis:    clis,
+		waitTxs: make([]*pb.Tx, 0, 100),
+		txPool:  make([]*pb.Tx, 0, 100),
 	}, nil
 }
 
 func (s *p2pServer) SuccessHashCalc(ctx context.Context, req *pb.SuccessHashCalcRequest) (*empty.Empty, error) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	s.waitTxs = s.txPool
+	s.txPool = make([]*pb.Tx, 0, 100)
+
 	nonce := req.GetNonce() // なんす
 	id := req.GetId()       // リクエストのID
 	var ok bool
@@ -75,21 +89,54 @@ func (s *p2pServer) SendCheckResult(ctx context.Context, req *pb.SendCheckResult
 	defer s.mux.Unlock()
 
 	// NOTE: なければ初期化
-	if _, ok := s.successHashCalc[req.GetId()]; !ok {
-		s.successHashCalc[req.GetId()] = 0
+	if _, ok := s.successHashCnt[req.GetId()]; !ok {
+		s.successHashCnt[req.GetId()] = 0
 	}
 
 	if req.GetIsOk() {
-		s.successHashCalc[req.GetId()]++
+		s.successHashCnt[req.GetId()]++
 	}
 
-	if s.successHashCalc[req.GetId()] >= 3 /* しきい値を環境変数注入 */ {
+	if s.successHashCnt[req.GetId()] >= 3 /* しきい値を環境変数注入 */ {
+		txs, err := s.clis[leaderHost].GetTxPool(ctx, &empty.Empty{})
+		if err != nil {
+			log.L().Error("cannot GetTxPool",
+				zap.Error(err))
+		}
+		pp.Println(txs)
+		// TODO: Save block
+		// s.repo.InsertBlock()
 	}
 
 	return &empty.Empty{}, nil
 }
 
-func (s *p2pServer) GetTxPool(context.Context, *empty.Empty) (*pb.Tarekomis, error) {
-	// TODO: リーダーのみうけとることができる
-	return nil, nil
+func (s *p2pServer) GetTxPool(ctx context.Context, req *empty.Empty) (*pb.Txs, error) {
+	txs := make([]*pb.Tx, 0, len(s.waitTxs))
+	for _, tx := range s.waitTxs {
+		txs = append(txs, &pb.Tx{
+			UserName:          tx.GetUserName(),
+			Url:               tx.GetUrl(),
+			Desc:              tx.GetDesc(),
+			ApprovedUserNames: tx.GetApprovedUserNames(),
+		})
+	}
+
+	return &pb.Txs{
+		Txs: txs,
+	}, nil
+}
+
+func (s *p2pServer) SendTx(ctx context.Context, req *pb.SendTxRequest) (*empty.Empty, error) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	s.txPool = append(s.txPool, &pb.Tx{
+		UserName:          req.GetUserName(),
+		Url:               req.GetUrl(),
+		Desc:              req.GetDesc(),
+		ApprovedUserNames: req.GetApprovedUserNames(),
+	})
+
+	return &empty.Empty{}, nil
 }

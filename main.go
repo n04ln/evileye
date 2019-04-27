@@ -62,8 +62,6 @@ func main() {
 
 	pb.RegisterPublicServer(s, publicServer)
 	pb.RegisterPrivateServer(s, privServer)
-	log.L().Info(
-		"register server, serve it!")
 
 	driverName := "sqlite3"
 	dbPath := "./data.sqlite3"
@@ -80,8 +78,12 @@ func main() {
 	if err != nil {
 		log.L().Fatal("cannot create BackgroundTask")
 	}
+	log.L().Info("Please wait 30 seconds for provisioning node server!")
+	// NOTE: for provisioning
+	time.Sleep(30 * time.Second)
 	go bTask.Do() // NOTE: this task is calc hash infinity :)
 
+	log.L().Info("Start Server And Node!")
 	if err := s.Serve(lis); err != nil {
 		log.L().Fatal("failed to serve", zap.Error(err))
 	}

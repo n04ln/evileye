@@ -43,8 +43,12 @@ docker-compose: docker
 	${docker_compose_env} docker-compose down
 	${docker_compose_env} docker-compose up -d
 	sleep 2
-	docker cp schema/ evileye:/
-	${docker_compose_env} docker-compose exec evileye /bin/sh /schema/provisioning.sh /${schema_file} /evileye/${database_file}
+	docker cp schema/ evileye1:/
+	${docker_compose_env} docker-compose exec evileye1 /bin/sh /schema/provisioning.sh /${schema_file} /evileye/${database_file}
+	docker cp schema/ evileye2:/
+	${docker_compose_env} docker-compose exec evileye2 /bin/sh /schema/provisioning.sh /${schema_file} /evileye/${database_file}
+	docker cp schema/ evileye3:/
+	${docker_compose_env} docker-compose exec evileye3 /bin/sh /schema/provisioning.sh /${schema_file} /evileye/${database_file}
 
 reset-db:
 	-[ -e ${database_file} ] && rm -rf ${database_file}
