@@ -75,11 +75,16 @@ func (r *sqliteTarekomiRepository) GetTarekomiFromUser(ctx context.Context, id, 
 			return *ts, err
 		}
 
+		u1, err := getUserByID(ctx, t.ID, r.db)
+		if err != nil {
+			return *ts, err
+		}
+
 		tp := pb.TarekomiSummary{
 			Tarekomi: &pb.Tarekomi{
-				TargetUserId: t.TargetUserID,
-				Url:          t.URL,
-				Desc:         t.Description,
+				TargetUserName: u1.ScreenName,
+				Url:            t.URL,
+				Desc:           t.Description,
 			},
 			UserName: u.ScreenName,
 		}
@@ -125,9 +130,9 @@ func (r *sqliteTarekomiRepository) GetTarekomiBoard(ctx context.Context, limit, 
 
 		tp := pb.TarekomiSummary{
 			Tarekomi: &pb.Tarekomi{
-				TargetUserId: t.TargetUserID,
-				Url:          t.URL,
-				Desc:         t.Description,
+				TargetUserName: n.ScreenName,
+				Url:            t.URL,
+				Desc:           t.Description,
 			},
 			UserName: n.ScreenName,
 		}
@@ -194,9 +199,9 @@ func (r *sqliteTarekomiRepository) GetTarekomiFromID(ctx context.Context, tid in
 
 		tp = pb.TarekomiSummary{
 			Tarekomi: &pb.Tarekomi{
-				TargetUserId: t.TargetUserID,
-				Url:          t.URL,
-				Desc:         t.Description,
+				TargetUserName: n.ScreenName,
+				Url:            t.URL,
+				Desc:           t.Description,
 			},
 			UserName: n.ScreenName,
 		}
