@@ -16,6 +16,11 @@ import (
 	"google.golang.org/grpc"
 )
 
+var (
+	RestartCalc = make(chan struct{}, 1)
+	StopCalc    = make(chan struct{}, 1)
+)
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -51,6 +56,17 @@ func NewBackgroundTask(
 // NOTE: Should do `go b.Do()` in main function
 func (b *BackgroundTask) Do() {
 	for {
+		select {
+		case <-StopCalc:
+			for {
+				select {
+				case <-RestartCalc:
+					goto CALC
+				}
+			}
+		default:
+		}
+	CALC:
 		nonce := generateNonce(rand.Intn(6)) // NOTE: 6 is default, can change it but if it is large, calclation is to slow.
 		latestBlock, err := b.repo.GetLatestBlock()
 		if err != nil {
@@ -74,7 +90,7 @@ func (b *BackgroundTask) Do() {
 				}
 			}
 		}
-		time.Sleep(100 * time.Millisecond) // NOTE: sloppy sleep
+		time.Sleep(10 * time.Millisecond) // NOTE: sloppy sleep
 	}
 }
 
@@ -103,8 +119,10 @@ func (b BackgroundTask) IsValidNonce(nonce string) bool {
 func canGenerateBlock(prevHash, nonce string) bool {
 	// このなかのいづれかが含まれればよい
 	parts := []string{
-		"HEI",
-		"SEI",
+		"HE",
+		"II",
+		"SE",
+		"II",
 	}
 
 	// チェック補助関数
