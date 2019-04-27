@@ -14,15 +14,20 @@ import (
 )
 
 func (pth *privateServer) Tarekomi(c context.Context, tarekomireq *pb.TarekomiReq) (*pb.Empty, error) {
+	u, err := pth.URepository.UserGetByName(c, tarekomireq.Tarekomi.TargetUserName)
+	if err != nil {
+		return &pb.Empty{}, status.Error(codes.Unavailable, "cannot find requested username")
+	}
+
 	nt := entity.Tarekomi{
 		Status:       0,
 		Threshold:    config.GetConfig().Threshold,
-		TargetUserID: tarekomireq.Tarekomi.TargetUserId,
+		TargetUserID: u.ID,
 		URL:          tarekomireq.Tarekomi.Url,
 		Description:  tarekomireq.Tarekomi.Desc,
 	}
 
-	_, err := pth.TRepository.Store(c, nt)
+	_, err = pth.TRepository.Store(c, nt)
 	if err != nil {
 		log.L().Error("Tarekomi Store failed", zap.Error(err))
 		return &pb.Empty{}, status.Error(codes.Internal, "Database down")
