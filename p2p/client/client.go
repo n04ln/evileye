@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	leaderHost = "localhost:50051"
+	leaderHost = "evileye1:50051"
 )
 
 func NewInternalClient() (InternalClient, error) {

@@ -13,7 +13,8 @@ message SuccessHashCalcRequest {
 
 message SendCheckResultRequest {
     string id = 1;
-    bool is_ok = 2;
+    string nonce = 2;
+    bool is_ok = 3;
 }
 
 message Tarekomis {

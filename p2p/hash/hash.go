@@ -126,3 +126,8 @@ func canGenerateBlock(prevHash, nonce string) bool {
 		zap.Bool("isOk", isOk)) // NOTE: [HEI, SEI] が入ってることをわかりやすくしたい
 	return isOk
 }
+
+func CalcHash(prevHash, nonce string) string {
+	h := sha256.Sum256([]byte(prevHash + nonce))
+	return hex.EncodeToString(h[:])
+}

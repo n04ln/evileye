@@ -32,7 +32,7 @@ func WithJWT(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, h
 			codes.InvalidArgument, fmt.Sprintf("method is invalid: %s", method))
 	}
 
-	if spMethod[1] == "evileye.Public" {
+	if spMethod[1] == "evileye.Public" || spMethod[1] == "evileye.Internal" {
 		return handler(ctx, req)
 	}
 
