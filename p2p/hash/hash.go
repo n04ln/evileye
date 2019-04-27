@@ -88,6 +88,16 @@ func generateNonce(n int) string {
 	return string(b)
 }
 
+func (b BackgroundTask) IsValidNonce(nonce string) bool {
+	latestBlock, err := b.repo.GetLatestBlock()
+	if err != nil {
+		log.L().Error("failed blockRepo.GetLatestBlockHash", zap.Error(err))
+		return false
+	}
+	prevHash := latestBlock.Hash
+	return canGenerateBlock(prevHash, nonce)
+}
+
 // canGenerateBlock ... ハッシュ計算をして、ブロックが作れるかどうかを見る
 // この関数がTRUEを返したら、見事ブロックを作成する権利が得られる
 func canGenerateBlock(prevHash, nonce string) bool {

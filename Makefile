@@ -4,7 +4,7 @@ env := GO111MODULE=on CGO_ENABLED=1
 for_linux := GOOS=linux GOARCH=amd64
 image := golang:1.12
 tag := $(shell git symbolic-ref --short HEAD | sed 's,/,-,g')
-docker_compose_env := EVIL_EYE_IMAGE="noahorberg/evileye:${tag}" DATABASEFILE="/${database_file}" 
+docker_compose_env := EVIL_EYE_IMAGE="noahorberg/evileye:${tag}" DATABASEFILE="/evileye/${database_file}"
 commit_hash := $(shell git log --pretty=format:%H -n 1)
 build_time := $(shell date +%s)
 build_container := "build_evileye"
@@ -44,7 +44,7 @@ docker-compose: docker
 	${docker_compose_env} docker-compose up -d
 	sleep 2
 	docker cp schema/ evileye:/
-	${docker_compose_env} docker-compose exec evileye /bin/sh /schema/provisioning.sh /${schema_file} /${database_file}
+	${docker_compose_env} docker-compose exec evileye /bin/sh /schema/provisioning.sh /${schema_file} /evileye/${database_file}
 
 reset-db:
 	-[ -e ${database_file} ] && rm -rf ${database_file}

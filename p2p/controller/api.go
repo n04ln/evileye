@@ -6,12 +6,19 @@ import (
 
 	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
+	"github.com/NoahOrberg/evileye/repository"
 	"github.com/golang/protobuf/ptypes/empty"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 type p2pServer struct {
+	txPool []struct {
+		UserName string `json:"user_name"`
+		URL      string `json:"url"`
+	}
+	repo repository.Blocks
+	// NOTE: clis[0] is LEADER, So Arrays order must be same between each nodes.
 	clis            map[string]pb.InternalClient // NOTE: map[HOST]*Client
 	successHashCalc map[string]int64             // NOTE: MUST USE RWMutex
 	mux             sync.RWMutex
@@ -35,10 +42,32 @@ func NewP2PServer(hosts []string) (pb.InternalServer, error) {
 }
 
 func (s *p2pServer) SuccessHashCalc(ctx context.Context, req *pb.SuccessHashCalcRequest) (*empty.Empty, error) {
-	// 再計算してできたらSendCheckResultにブロードキャスト
-	panic("not impl")
+	nonce := req.GetNonce() // なんす
+	id := req.GetId()       // リクエストのID
+	var ok bool
+	if ok = s.b.IsValidNonce(nonce); !ok {
+		log.L().Error("invalid nonce",
+			zap.String("id", id),
+			zap.String("nonce", nonce))
+	} else {
+		log.L().Error("VALID NONCE !!!",
+			zap.String("id", id),
+			zap.String("nonce", nonce))
+	}
+	for _, cli := range s.clis {
+		if _, err := cli.SendCheckResult(ctx, &pb.SendCheckResultRequest{
+			Id:   id,
+			IsOk: ok,
+		}); err != nil {
+			log.L().Error("cannot send to other node",
+				zap.String("id", id),
+				zap.String("nonce", nonce))
+		}
+	}
+	return &empty.Empty{}, nil
 }
 
+// 他のノードが計算確認したものを受け取る
 func (s *p2pServer) SendCheckResult(ctx context.Context, req *pb.SendCheckResultRequest) (*empty.Empty, error) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
@@ -53,7 +82,6 @@ func (s *p2pServer) SendCheckResult(ctx context.Context, req *pb.SendCheckResult
 	}
 
 	if s.successHashCalc[req.GetId()] >= 3 /* しきい値を環境変数注入 */ {
-		// TODO: Block追加
 	}
 
 	return &empty.Empty{}, nil
@@ -61,5 +89,5 @@ func (s *p2pServer) SendCheckResult(ctx context.Context, req *pb.SendCheckResult
 
 func (s *p2pServer) GetTxPool(context.Context, *empty.Empty) (*pb.Tarekomis, error) {
 	// TODO: リーダーのみうけとることができる
-
+	return nil, nil
 }
