@@ -8,6 +8,7 @@ import (
 	"github.com/NoahOrberg/evileye/controller"
 	"github.com/NoahOrberg/evileye/interceptor"
 	"github.com/NoahOrberg/evileye/log"
+	p2pclient "github.com/NoahOrberg/evileye/p2p/client"
 	p2phash "github.com/NoahOrberg/evileye/p2p/hash"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/NoahOrberg/evileye/repository"
@@ -46,7 +47,7 @@ func main() {
 	vr := repository.NewSqliteVoteRepository(db)
 	ur := repository.NewSqliteUserRepository(db)
 
-	ic, err := p2phash.NewInternalClient()
+	ic, err := p2pclient.NewInternalClient()
 	if err != nil {
 		panic(err)
 	}
