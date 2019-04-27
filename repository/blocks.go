@@ -25,8 +25,8 @@ func (b *blocks) GetLatestBlock() (*entity.Block, error) {
         FROM blocks
         WHERE create_time = (SELECT MAX(create_time) FROM blocks);`)
 	if err := row.Scan(
-		&block.Id,
-		&block.Prevhash,
+		&block.ID,
+		&block.PrevHash,
 		&block.Data,
 		&block.CreateTime,
 		&block.Hash); err != nil {

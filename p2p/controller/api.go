@@ -2,11 +2,12 @@ package p2pcontroller
 
 import (
 	"context"
-	"log"
 	"sync"
 
+	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/golang/protobuf/ptypes/empty"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -23,7 +24,7 @@ func NewP2PServer(hosts []string) (pb.InternalServer, error) {
 	for _, host := range hosts {
 		conn, err := grpc.Dial(host, grpc.WithInsecure())
 		if err != nil {
-			log.Printf("[INFO] did not connect: %v", err)
+			log.L().Error("did not connect: %v", zap.Error(err))
 		}
 		clis[host] = pb.NewInternalClient(conn)
 	}

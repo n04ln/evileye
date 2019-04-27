@@ -8,11 +8,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/NoahOrberg/evileye/infra/repository"
 	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
-	"github.com/k0kubun/pp"
-	uuid "github.com/satori/go.uuid"
+	"github.com/NoahOrberg/evileye/repository"
+	uuid "github.com/google/uuid"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -55,13 +54,12 @@ func (b *BackgroundTask) Do() {
 		nonce := generateNonce(rand.Intn(6)) // NOTE: 6 is default, can change it but if it is large, calclation is to slow.
 		latestBlock, err := b.repo.GetLatestBlock()
 		if err != nil {
-			log.L().Warn("failed blockRepo.GetLatestBlockHash", zap.Error(err))
-			pp.Println(err)
+			log.L().Error("failed blockRepo.GetLatestBlockHash", zap.Error(err))
 			continue
 		}
 		prevHash := latestBlock.Hash
 		if canGenerateBlock(prevHash, nonce) {
-			id, _ := uuid.NewV4() // NOTE: save it? maybe ok that is not necessary save.
+			id := uuid.New() // NOTE: save it? maybe ok that is not necessary save.
 			for _, cli := range b.clis {
 				_, err := cli.SuccessHashCalc(context.Background(), &pb.SuccessHashCalcRequest{
 					Id:    id.String(),

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/NoahOrberg/evileye/controller"
-	"github.com/NoahOrberg/evileye/infra/repository"
 	"github.com/NoahOrberg/evileye/interceptor"
 	"github.com/NoahOrberg/evileye/log"
 	p2phash "github.com/NoahOrberg/evileye/p2p/hash"
@@ -68,7 +67,7 @@ func main() {
 
 	driverName := "sqlite3"
 	dbPath := "./data.sqlite3"
-	db, err := sqlx.Open(driverName, dbPath) // TODO: maybe path is invalid in container.
+	db, err = sqlx.Open(driverName, dbPath) // TODO: maybe path is invalid in container.
 	if err != nil {
 		log.L().Fatal("cannot open DB",
 			zap.Error(err),
