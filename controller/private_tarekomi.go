@@ -8,6 +8,7 @@ import (
 	"github.com/NoahOrberg/evileye/interceptor"
 	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
+	"github.com/NoahOrberg/evileye/wayback"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,14 +17,21 @@ import (
 func (pth *privateServer) Tarekomi(c context.Context, tarekomireq *pb.TarekomiReq) (*pb.Empty, error) {
 	u, err := pth.URepository.UserGetByName(c, tarekomireq.Tarekomi.TargetUserName)
 	if err != nil {
-		return &pb.Empty{}, status.Error(codes.Unavailable, "cannot find requested username")
+		log.L().Error("cannot get requested user name : ", zap.Error(err))
+		return &pb.Empty{}, status.Error(codes.Internal, "cannot find requested username")
+	}
+
+	wayurl, err := wayback.NewTarekomi(tarekomireq.Tarekomi.Url)
+	if err != nil {
+		log.L().Error("cannot save requested url : ", zap.Error(err))
+		return &pb.Empty{}, status.Error(codes.Internal, "cannot save request url")
 	}
 
 	nt := entity.Tarekomi{
 		Status:       0,
 		Threshold:    config.GetConfig().Threshold,
 		TargetUserID: u.ID,
-		URL:          tarekomireq.Tarekomi.Url,
+		URL:          wayurl,
 		Description:  tarekomireq.Tarekomi.Desc,
 	}
 
