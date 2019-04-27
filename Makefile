@@ -10,7 +10,7 @@ build_time := $(shell date +%s)
 build_container := "build_evileye"
 
 proto:
-	protoc --proto_path=${GOPATH}/src:. --go_out=plugins=grpc:./ ./protobuf/*.proto
+	protoc --proto_path=${GOPATH}/src:./protobuf/ --go_out=plugins=grpc:./protobuf ./protobuf/*.proto
 
 push: build-for-image
 	docker build -t noahorberg/evileye:${tag} ./

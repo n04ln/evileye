@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/NoahOrberg/evileye/log"
+	"github.com/NoahOrberg/evileye/p2p/hash"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/NoahOrberg/evileye/repository"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -17,7 +18,8 @@ type p2pServer struct {
 		UserName string `json:"user_name"`
 		URL      string `json:"url"`
 	}
-	repo repository.Blocks
+	b    p2phash.BackgroundTask
+	repo repository.Blocks // TODO: define it
 	// NOTE: clis[0] is LEADER, So Arrays order must be same between each nodes.
 	clis            map[string]pb.InternalClient // NOTE: map[HOST]*Client
 	successHashCalc map[string]int64             // NOTE: MUST USE RWMutex

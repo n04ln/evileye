@@ -20,6 +20,13 @@ message Tarekomis {
     repeated Tarekomi tarekomis = 1;
 }
 
+message SendTxRequest {
+    string user_name = 1;
+    string url = 2;
+    string desc = 3;
+    repeated string approved_user_names = 4;
+}
+
 service Internal {
     /*
         SuccessHashCalc
@@ -50,4 +57,11 @@ service Internal {
      */
     rpc GetTxPool(google.protobuf.Empty)
         returns (Tarekomis);
+
+    /*
+        SendTx
+
+        ApproveになったTarekomiを投げる. (リーダーノードのみ!)
+     */
+    rpc SendTx(SendTxRequest) returns (google.protobuf.Empty);
 }
