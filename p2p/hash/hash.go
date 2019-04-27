@@ -58,15 +58,9 @@ func (b *BackgroundTask) Do() {
 	for {
 		select {
 		case <-StopCalc:
-			for {
-				select {
-				case <-RestartCalc:
-					goto CALC
-				}
-			}
+			<-RestartCalc
 		default:
 		}
-	CALC:
 		nonce := generateNonce(rand.Intn(6)) // NOTE: 6 is default, can change it but if it is large, calclation is to slow.
 		latestBlock, err := b.repo.GetLatestBlock()
 		if err != nil {
