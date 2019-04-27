@@ -1,4 +1,4 @@
-client/
+api_client/
 vendor/
 bin/
 data.sqlite3
