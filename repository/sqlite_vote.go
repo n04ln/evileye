@@ -19,7 +19,7 @@ func NewSqliteVoteRepository(db *sqlx.DB) SqliteVoteRepository {
 func checkVotes(ctx context.Context, tid int64, db *sqlx.DB) (bool, error) {
 	qstr := `SELECT count(*) FROM votes WHERE tarekomiid = ?`
 
-	t := new(entity.Tarekomi)
+	t := &entity.Tarekomi{}
 
 	res, err := db.Query(qstr, tid)
 	if err != nil {
@@ -36,6 +36,11 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB) (bool, error) {
 
 	if t.Threshold >= sumofvote {
 		log.Println("Tarekomi Approved!")
+		t.Status = 1
+		_, err := UpdateTarekomiState(ctx, *t, db)
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return true, nil

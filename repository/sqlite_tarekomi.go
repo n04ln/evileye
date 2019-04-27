@@ -22,6 +22,17 @@ func NewSqliteTarekomiRepository(db *sqlx.DB) TarekomiRepository {
 	return &sqliteTarekomiRepository{db}
 }
 
+func UpdateTarekomiState(ctx context.Context, newtarekomi entity.Tarekomi, db *sqlx.DB) (entity.Tarekomi, error) {
+	qstr := `UPDATE tarekomi SET state = ? WHERE id = ?`
+
+	_, err := db.Exec(qstr, newtarekomi.Status, newtarekomi.ID)
+	if err != nil {
+		return newtarekomi, err
+	}
+
+	return newtarekomi, nil
+}
+
 func getUserByID(ctx context.Context, uid int64, db *sqlx.DB) (*entity.User, error) {
 	qstr := `SELECT * FROM users WHERE id = ?`
 	u := new(entity.User)
