@@ -1,10 +1,27 @@
 version: "3"
 
 services:
-    evileye:
-        container_name: evileye
+    evileye1:
+        container_name: evileye1
         image: ${EVIL_EYE_IMAGE}
         ports:
             - 50051:50051
         environment:
+            PORT: "50051"
+            DB_FILE: ${DATABASEFILE}
+    evileye2:
+        container_name: evileye2
+        image: ${EVIL_EYE_IMAGE}
+        ports:
+            - 50052:50051
+        environment:
+            PORT: "50052"
+            DB_FILE: ${DATABASEFILE}
+    evileye3:
+        container_name: evileye3
+        image: ${EVIL_EYE_IMAGE}
+        ports:
+            - 50053:50051
+        environment:
+            PORT: "50053"
             DB_FILE: ${DATABASEFILE}
