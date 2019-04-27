@@ -41,9 +41,9 @@ func main() {
 	blockRepo := repository.NewBlocksRepository(db)
 	bTask, err := p2phash.NewBackgroundTask(
 		[]string{
-			"localhost:50051",
-			"localhost:50052",
-			"localhost:50053",
+			"evileye1:50051",
+			"evileye2:50052",
+			"evileye3:50053",
 		}, blockRepo) // TODO: fill it
 	if err != nil {
 		log.L().Fatal("cannot create BackgroundTask")
