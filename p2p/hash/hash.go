@@ -5,6 +5,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"io"
+	"io/ioutil"
 	"math/rand"
 	"sync"
 	"time"
@@ -14,6 +16,8 @@ import (
 	"github.com/NoahOrberg/evileye/repository"
 	uuid "github.com/google/uuid"
 	"go.uber.org/zap"
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
 	"google.golang.org/grpc"
 )
 
@@ -175,7 +179,28 @@ func canGenerateBlock(prevHash, nonce string) bool {
 	log.L().Info("calced Hash is",
 		zap.String("value", hex.EncodeToString(h[:])),
 		zap.String("nonce", nonce),
-		zap.Strings("parts", parts),
+		zap.Strings("parts", func(parts [][]byte) []string {
+			bytesFromShiftJIS := func(b []byte) (string, error) {
+				transformEncoding := func(rawReader io.Reader, trans transform.Transformer) (string, error) {
+					ret, err := ioutil.ReadAll(transform.NewReader(rawReader, trans))
+					if err == nil {
+						return string(ret), nil
+					} else {
+						return "", err
+					}
+				}
+				return transformEncoding(bytes.NewReader(b), japanese.EUCJP.NewDecoder())
+			}
+			res := []string{}
+			for _, p := range parts {
+				s, e := bytesFromShiftJIS(p)
+				if e != nil {
+					return nil
+				}
+				res = append(res, s)
+			}
+			return res
+		}(parts)),
 		zap.Bool("isOk", isOk)) // NOTE: [HEI, SEI] が入ってることをわかりやすくしたい
 	return isOk
 }
