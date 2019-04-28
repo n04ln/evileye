@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/NoahOrberg/evileye/entity"
@@ -17,12 +18,16 @@ type Blocks interface {
 
 func NewBlocksRepository(db *sqlx.DB) Blocks {
 	return &blocks{
-		db: db,
+		db:           db,
+		insertedHash: make([]string, 2, 2),
+		mux:          new(sync.RWMutex),
 	}
 }
 
 type blocks struct {
-	db *sqlx.DB
+	db           *sqlx.DB
+	insertedHash []string
+	mux          *sync.RWMutex
 }
 
 func (b *blocks) GetLatestBlock() (*entity.Block, error) {
@@ -43,8 +48,31 @@ func (b *blocks) GetLatestBlock() (*entity.Block, error) {
 
 func (b *blocks) InsertBlock(ctx context.Context,
 	data, prevHash, hash string) (*entity.Block, error) {
-	block := new(entity.Block)
 
+	b.mux.Lock()
+	{
+		// 重複でInsertを避けるため、あとからのものは無視する
+		for _, h := range b.insertedHash {
+			if h == prevHash {
+				log.L().Info("BLOCKING CREATE BLOCK",
+					zap.String("data", data),
+					zap.String("prevHash", prevHash),
+					zap.String("hash", hash),
+				)
+				return nil, nil
+			}
+		}
+		for i, h := range b.insertedHash {
+			if i == 0 {
+				continue
+			}
+			b.insertedHash[i-1] = h
+		}
+		b.insertedHash[len(b.insertedHash)-1] = prevHash
+	}
+	b.mux.Unlock()
+
+	block := new(entity.Block)
 	block.Data = data
 	block.PrevHash = prevHash
 	block.Hash = hash

@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/NoahOrberg/evileye/log"
@@ -17,8 +18,8 @@ import (
 )
 
 var (
-	RestartCalc = make(chan struct{}, 1)
-	StopCalc    = make(chan struct{}, 1)
+	RestartCalc = make(chan struct{}, 5)
+	StopCalc    = make(chan struct{}, 5)
 )
 
 func init() {
@@ -29,25 +30,20 @@ var rs1Letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // BackgroundTask includes repository and clients information
 type BackgroundTask struct {
-	repo repository.Blocks // TODO: define it
-	clis []pb.InternalClient
+	repo  repository.Blocks // TODO: define it
+	clis  map[string]pb.InternalClient
+	once  *sync.Once
+	isDo  bool
+	hosts []string
 }
 
 func NewBackgroundTask(
 	hosts []string, repo repository.Blocks) (*BackgroundTask, error) {
 
-	clis := make([]pb.InternalClient, 0, len(hosts))
-	for _, host := range hosts {
-		conn, err := grpc.Dial(host, grpc.WithInsecure())
-		if err != nil {
-			return nil, err
-		}
-		clis = append(clis, pb.NewInternalClient(conn))
-	}
-
 	return &BackgroundTask{
-		repo: repo,
-		clis: clis,
+		repo:  repo,
+		hosts: hosts,
+		once:  new(sync.Once),
 	}, nil
 }
 
@@ -58,7 +54,20 @@ func (b *BackgroundTask) Do() {
 	for {
 		select {
 		case <-StopCalc:
+			b.isDo = false
+			log.L().Info("BACKGROUND TASK SLEEP!")
+			go func() {
+				time.Sleep(5 * time.Second)
+				if !b.isDo {
+					log.L().Info("FORCE RESTART!")
+					RestartCalc <- struct{}{}
+					return
+				}
+				log.L().Info("Unncessary FORCE RESTART!")
+			}()
 			<-RestartCalc
+			b.isDo = true
+			log.L().Info("BACKGROUND TASK RESTART!")
 		default:
 		}
 		nonce := generateNonce(rand.Intn(6)) // NOTE: 6 is default, can change it but if it is large, calclation is to slow.
@@ -69,20 +78,51 @@ func (b *BackgroundTask) Do() {
 		}
 		prevHash := latestBlock.Hash
 		if canGenerateBlock(prevHash, nonce) {
-			id := uuid.New() // NOTE: save it? maybe ok that is not necessary save.
-			for _, cli := range b.clis {
-				_, err := cli.SuccessHashCalc(context.Background(), &pb.SuccessHashCalcRequest{
-					Id:    id.String(),
-					Nonce: nonce,
-				})
-				if err != nil {
-					log.L().Error("failed SuccessHashCalc",
-						zap.Error(err),
-						zap.String("id", id.String()),
-						zap.String("nonce", nonce),
-					)
+			b.once.Do(func() {
+				log.L().Info("FIRST SUCESS HASH CALC in BACKGROUND TASK, So add Client Connection!")
+				// Connect other nodes
+				clis := make(map[string]pb.InternalClient)
+				for _, host := range b.hosts {
+					conn, err := grpc.Dial(host, grpc.WithInsecure())
+					if err != nil {
+						log.L().Error("did not connect: %v", zap.Error(err))
+					}
+					clis[host] = pb.NewInternalClient(conn)
 				}
+				b.clis = clis
+			})
+
+			id := uuid.New() // NOTE: save it? maybe ok that is not necessary save.
+			waitCh := make(chan struct{}, len(b.clis))
+			done := make(chan struct{}, 1)
+			for host, cli := range b.clis {
+				go func(host string, cli pb.InternalClient) {
+					waitCh <- struct{}{}
+					<-done
+					log.L().Info("SEND SuccessHashCalc",
+						zap.String("host", host),
+						zap.String("id", id.String()),
+						zap.String("nonce", nonce))
+					_, err := cli.SuccessHashCalc(
+						context.Background(), &pb.SuccessHashCalcRequest{
+							Id:    id.String(),
+							Nonce: nonce,
+						})
+					log.L().Info("SENDED SuccessHashCalc")
+					if err != nil {
+						log.L().Error("failed SuccessHashCalc",
+							zap.Error(err),
+							zap.String("id", id.String()),
+							zap.String("nonce", nonce),
+						)
+					}
+				}(host, cli)
 			}
+			for i := 0; i < len(b.clis); i++ {
+				<-waitCh
+				log.L().Info("waiting for Sending SuccessHashCalc...")
+			}
+			close(done) // DONE!!
 		}
 		time.Sleep(10 * time.Millisecond) // NOTE: sloppy sleep
 	}
@@ -98,6 +138,7 @@ func generateNonce(n int) string {
 	return string(b)
 }
 
+// IsValidNonce is
 func (b BackgroundTask) IsValidNonce(nonce string) bool {
 	latestBlock, err := b.repo.GetLatestBlock()
 	if err != nil {
@@ -134,6 +175,7 @@ func canGenerateBlock(prevHash, nonce string) bool {
 	isOk := check(h[:], parts)
 	log.L().Info("calced Hash is",
 		zap.String("value", hex.EncodeToString(h[:])),
+		zap.String("nonce", nonce),
 		zap.Strings("parts", parts),
 		zap.Bool("isOk", isOk)) // NOTE: [HEI, SEI] が入ってることをわかりやすくしたい
 	return isOk
