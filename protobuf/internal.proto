@@ -43,6 +43,10 @@ message HealthCheckResponse {
     string hash = 1;
 }
 
+message GetTxPoolRequest {
+    string id = 1;
+    }
+
 service Internal {
     rpc HealthCheck(google.protobuf.Empty) returns (HealthCheckResponse);
     /*
@@ -72,7 +76,7 @@ service Internal {
 
         リーダーノードはTxPoolの内容をすべて返す
      */
-    rpc GetTxPool(google.protobuf.Empty)
+    rpc GetTxPool(GetTxPoolRequest)
         returns (Txs);
 
     /*

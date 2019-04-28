@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/NoahOrberg/evileye/entity"
@@ -11,23 +10,24 @@ import (
 	"go.uber.org/zap"
 )
 
+var ch = make(chan struct{}, 1)
+
 type Blocks interface {
 	GetLatestBlock() (*entity.Block, error)
 	InsertBlock(ctx context.Context, data, prevHash, hash string) (*entity.Block, error)
 }
 
 func NewBlocksRepository(db *sqlx.DB) Blocks {
+	ch <- struct{}{}
 	return &blocks{
 		db:           db,
 		insertedHash: make([]string, 2, 2),
-		mux:          new(sync.RWMutex),
 	}
 }
 
 type blocks struct {
 	db           *sqlx.DB
 	insertedHash []string
-	mux          *sync.RWMutex
 }
 
 func (b *blocks) GetLatestBlock() (*entity.Block, error) {
@@ -49,28 +49,39 @@ func (b *blocks) GetLatestBlock() (*entity.Block, error) {
 func (b *blocks) InsertBlock(ctx context.Context,
 	data, prevHash, hash string) (*entity.Block, error) {
 
-	b.mux.Lock()
-	{
-		// 重複でInsertを避けるため、あとからのものは無視する
-		for _, h := range b.insertedHash {
-			if h == prevHash {
-				log.L().Info("BLOCKING CREATE BLOCK",
-					zap.String("data", data),
-					zap.String("prevHash", prevHash),
-					zap.String("hash", hash),
-				)
-				return nil, nil
-			}
-		}
-		for i, h := range b.insertedHash {
-			if i == 0 {
-				continue
-			}
-			b.insertedHash[i-1] = h
-		}
-		b.insertedHash[len(b.insertedHash)-1] = prevHash
+	<-ch
+	defer func() {
+		ch <- struct{}{}
+	}()
+
+	var bl *entity.Block
+	var err error
+	if bl, err = b.GetLatestBlock(); err != nil {
+		return nil, err
 	}
-	b.mux.Unlock()
+	if bl.PrevHash == prevHash {
+		log.L().Info("BLOCKING CREATE BLOCK",
+			zap.String("data", data),
+			zap.String("prevHash", prevHash),
+			zap.String("hash", hash))
+		return nil, nil
+	}
+	if bl.Hash != prevHash {
+		log.L().Info("CANNOT CREATE BLOCK COZ INVALID INTEGRITY",
+			zap.String("data", data),
+			zap.String("actual_prevHash", bl.Hash),
+			zap.String("expected_prevHash", prevHash),
+			zap.String("hash", hash))
+		return nil, nil
+	}
+	if bl.CreateTime-1 <= time.Now().Unix() && time.Now().Unix() <= bl.CreateTime+1 {
+		log.L().Info("CANNOT CREATE BLOCK COZ INVALID INTEGRITY (TIME LAG)",
+			zap.String("data", data),
+			zap.String("actual_prevHash", bl.Hash),
+			zap.String("expected_prevHash", prevHash),
+			zap.String("hash", hash))
+		return nil, nil
+	}
 
 	block := new(entity.Block)
 	block.Data = data

@@ -57,7 +57,7 @@ func (b *BackgroundTask) Do() {
 			b.isDo = false
 			log.L().Info("BACKGROUND TASK SLEEP!")
 			go func() {
-				time.Sleep(5 * time.Second)
+				time.Sleep(10 * time.Second)
 				if !b.isDo {
 					log.L().Info("FORCE RESTART!")
 					RestartCalc <- struct{}{}
@@ -70,7 +70,7 @@ func (b *BackgroundTask) Do() {
 			log.L().Info("BACKGROUND TASK RESTART!")
 		default:
 		}
-		nonce := generateNonce(rand.Intn(6)) // NOTE: 6 is default, can change it but if it is large, calclation is to slow.
+		nonce := generateNonce(rand.Intn(100)) // NOTE: 6 is default, can change it but if it is large, calclation is to slow.
 		latestBlock, err := b.repo.GetLatestBlock()
 		if err != nil {
 			log.L().Error("failed blockRepo.GetLatestBlockHash", zap.Error(err))
@@ -124,7 +124,7 @@ func (b *BackgroundTask) Do() {
 			}
 			close(done) // DONE!!
 		}
-		time.Sleep(10 * time.Millisecond) // NOTE: sloppy sleep
+		time.Sleep(100 * time.Millisecond) // NOTE: sloppy sleep
 	}
 }
 
@@ -140,6 +140,7 @@ func generateNonce(n int) string {
 
 // IsValidNonce is
 func (b BackgroundTask) IsValidNonce(nonce string) bool {
+	log.L().Info("invoked IsValidNounce")
 	latestBlock, err := b.repo.GetLatestBlock()
 	if err != nil {
 		log.L().Error("failed blockRepo.GetLatestBlockHash", zap.Error(err))
@@ -153,17 +154,15 @@ func (b BackgroundTask) IsValidNonce(nonce string) bool {
 // この関数がTRUEを返したら、見事ブロックを作成する権利が得られる
 func canGenerateBlock(prevHash, nonce string) bool {
 	// このなかのいづれかが含まれればよい
-	parts := []string{
-		"HE",
-		"II",
-		"SE",
-		"II",
+	parts := [][]byte{
+		[]byte{0xCA, 0xBF}, // 平
+		[]byte{0xC0, 0xAE}, // 成
 	}
 
 	// チェック補助関数
-	check := func(hash []byte, heiseis []string) bool {
+	check := func(hash []byte, heiseis [][]byte) bool {
 		for _, part := range parts {
-			if bytes.Count(hash, []byte(part)) >= 1 {
+			if bytes.Count(hash, part) > 0 {
 				return true
 			}
 		}
