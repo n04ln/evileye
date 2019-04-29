@@ -23,7 +23,7 @@ func NewSqliteTarekomiRepository(db *sqlx.DB) TarekomiRepository {
 }
 
 func UpdateTarekomiState(ctx context.Context, newtarekomi entity.Tarekomi, db *sqlx.DB) (entity.Tarekomi, error) {
-	qstr := `UPDATE tarekomi SET state = ? WHERE id = ?`
+	qstr := `UPDATE tarekomi SET status = ? WHERE id = ?`
 
 	_, err := db.Exec(qstr, newtarekomi.Status, newtarekomi.ID)
 	if err != nil {

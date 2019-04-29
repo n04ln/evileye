@@ -37,7 +37,7 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 	}
 
 	if t.Threshold <= sumofvote {
-		log.L().Error("Tarekomi approved")
+		log.L().Info("Tarekomi approved")
 
 		t.Status = 1
 		_, err := UpdateTarekomiState(ctx, *t, db)

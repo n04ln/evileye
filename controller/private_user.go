@@ -16,6 +16,7 @@ func (puh *privateServer) GetUserInfo(c context.Context, uinforeq *pb.UserInfoRe
 
 	u, err := puh.URepository.UserGetByID(c, ui.ID)
 	if err != nil {
+		log.L().Error("UserGetByID error", zap.Error(err))
 		return &pb.User{}, status.Error(codes.Internal, "Database down")
 	}
 
