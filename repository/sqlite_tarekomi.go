@@ -125,7 +125,7 @@ func (r *sqliteTarekomiRepository) GetTarekomiBoard(ctx context.Context, limit, 
 		qstr := `SELECT * FROM tarekomi WHERE status = 0 
 		ORDER BY id LIMIT ? OFFSET ? NOT IN (? ` + strings.Repeat(`, ?`, len(voted)-1) + `)`
 
-		args := make([]interface{}, len(voted)+2)
+		args := make([]interface{}, 0, len(voted)+2)
 		args = append(args, limit)
 		args = append(args, offset)
 		for _, d := range voted {
