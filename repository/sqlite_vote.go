@@ -23,6 +23,14 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 	qstr := `SELECT count(*) FROM votes WHERE tarekomiid = ?`
 
 	t := &entity.Tarekomi{}
+	err := db.GetContext(ctx, t, `SELECT * FROM tarekomi WHERE id = ?`, tid)
+	if err != nil {
+		log.L().Error("sql query failed",
+			zap.String("q", `SELECT * FROM tarekomi WHERE id = ?`),
+			zap.Any("args", []interface{}{tid}),
+			zap.Error(err))
+		return false, err
+	}
 
 	res, err := db.Query(qstr, tid)
 	if err != nil {
