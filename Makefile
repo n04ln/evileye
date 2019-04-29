@@ -15,7 +15,7 @@ proto:
 buildi: build-for-image
 	docker build -t noahorberg/evileye:${tag} ./
 
-push: build-image
+push: buildi
 	docker push noahorberg/evileye:${tag}
 
 build:

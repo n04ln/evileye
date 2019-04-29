@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/NoahOrberg/evileye/entity"
 	"github.com/NoahOrberg/evileye/log"
@@ -22,6 +23,14 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 	qstr := `SELECT count(*) FROM votes WHERE tarekomiid = ?`
 
 	t := &entity.Tarekomi{}
+	err := db.GetContext(ctx, t, `SELECT * FROM tarekomi WHERE id = ?`, tid)
+	if err != nil {
+		log.L().Error("sql query failed",
+			zap.String("q", `SELECT * FROM tarekomi WHERE id = ?`),
+			zap.Any("args", []interface{}{tid}),
+			zap.Error(err))
+		return false, err
+	}
 
 	res, err := db.Query(qstr, tid)
 	if err != nil {
@@ -49,6 +58,10 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 		unames := make([]string, 0, sumofvote)
 		rows, err := db.Query(`SELECT userid FROM votes WHERE tarekomiid = ?`, t.ID)
 		if err != nil {
+			log.L().Error("exec query failed",
+				zap.String("q", `SELECT userid FROM votes WHERE tarekomiid = ?`),
+				zap.Any("args", []interface{}{t.ID}),
+				zap.Error(err))
 			return false, err
 		}
 
@@ -58,11 +71,19 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 			if err := rows.Scan(
 				&vu.UserID,
 			); err != nil {
+				log.L().Error("exec query failed",
+					zap.String("q", `SELECT userid FROM votes WHERE tarekomiid = ?`),
+					zap.Any("args", []interface{}{t.ID}),
+					zap.Error(err))
 				return false, err
 			}
 
 			us := new(entity.User)
 			if err := db.Get(us, q, vu.UserID); err != nil {
+				log.L().Error("exec query failed",
+					zap.String("q", q),
+					zap.Any("args", []interface{}{vu.UserID}),
+					zap.Error(err))
 				return false, err
 			}
 
@@ -72,13 +93,18 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 		u := new(entity.User)
 
 		if err := db.Get(u, q, t.TargetUserID); err != nil {
+			log.L().Error("exec query failed",
+				zap.String("q", q),
+				zap.Any("args", []interface{}{t.TargetUserID}),
+				zap.Error(err))
 			return false, err
 		}
 
 		log.L().Info("SentTxToLeaderNode", zap.String("username", u.ScreenName), zap.String("url", t.URL), zap.String("description", t.Description), zap.Strings("unames", unames))
 		err = ic.SentTxToLeaderNode(ctx, u.ScreenName, t.URL, t.Description, unames)
 		if err != nil {
-			log.L().Error("SentTxToleaderNode error", zap.Error(err))
+			log.L().Error("SentTxToLeaderNode error", zap.Error(err))
+			return false, errors.New("failed SentTxToLeaderNode")
 		}
 	}
 

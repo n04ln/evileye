@@ -30,6 +30,10 @@ func UpdateTarekomiState(ctx context.Context, newtarekomi entity.Tarekomi, db *s
 
 	_, err := db.Exec(qstr, newtarekomi.Status, newtarekomi.ID)
 	if err != nil {
+		log.L().Error("exec sql failed",
+			zap.String("q", qstr),
+			zap.Any("args", []interface{}{newtarekomi.Status, newtarekomi.ID}),
+			zap.Error(err))
 		return newtarekomi, err
 	}
 
