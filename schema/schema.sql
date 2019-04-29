@@ -47,4 +47,4 @@ INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(1
 INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 10, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1119128753148325888", "yt8492's kozirase tweet");
 
 -- FOR VOTE TEST
-INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 1, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1119128753148325888", "yt8492's kozirase tweet (threshold 1 test data)");
+INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 1, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1119128753148325888", "yt8492's kozirase tweet");
