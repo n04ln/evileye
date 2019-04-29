@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/NoahOrberg/evileye/interceptor"
+	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -26,6 +28,10 @@ func (puh *privateServer) GetUserInfo(c context.Context, uinforeq *pb.UserInfoRe
 func (puh *privateServer) GetUserList(c context.Context, userlistreq *pb.GetUserListReq) (*pb.Users, error) {
 	us, err := puh.URepository.UserGetByIDList(c, userlistreq.Limit, userlistreq.Offset)
 	if err != nil {
+		log.L().Error("repository error",
+			zap.Int64("limit", userlistreq.GetLimit()),
+			zap.Int64("offset", userlistreq.GetOffset()),
+			zap.Error(err))
 		return &pb.Users{}, status.Error(codes.Internal, "Database down")
 	}
 

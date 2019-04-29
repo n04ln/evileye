@@ -27,13 +27,14 @@ func (r *SqliteUserRepository) UserGetByID(ctx context.Context, id int64) (*enti
 }
 
 func (r *SqliteUserRepository) UserGetByIDList(ctx context.Context, limit, offset int64) ([]*entity.User, error) {
-	qstr := `SELECT * FROM users ORDER By id LIMIT ? OFFSET ?`
+	qstr := `SELECT id, screenname FROM users ORDER By id LIMIT ? OFFSET ?`
 	us := make([]*entity.User, 0, limit)
 
 	rows, err := r.db.Query(qstr, limit, offset)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		u := entity.User{}
