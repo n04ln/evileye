@@ -47,13 +47,12 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 
 		// get voted user id
 		unames := make([]string, 0, sumofvote)
-		rows, err := db.Query(`SELECT * FROM votes WHERE tarekomiid = ?`, t.ID)
+		rows, err := db.Query(`SELECT userid FROM votes WHERE tarekomiid = ?`, t.ID)
 		if err != nil {
 			return false, err
 		}
 
 		q := `SELECT * FROM users WHERE id = ?`
-
 		for rows.Next() {
 			vu := entity.Vote{}
 			if err := rows.Scan(
