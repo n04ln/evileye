@@ -4,8 +4,10 @@ import (
 	"context"
 
 	"github.com/NoahOrberg/evileye/entity"
+	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 )
 
 var (
@@ -27,6 +29,10 @@ func UpdateTarekomiState(ctx context.Context, newtarekomi entity.Tarekomi, db *s
 
 	_, err := db.Exec(qstr, newtarekomi.Status, newtarekomi.ID)
 	if err != nil {
+		log.L().Error("exec sql failed",
+			zap.String("q", qstr),
+			zap.Any("args", []interface{}{newtarekomi.Status, newtarekomi.ID}),
+			zap.Error(err))
 		return newtarekomi, err
 	}
 
