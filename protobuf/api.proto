@@ -16,7 +16,7 @@ message Empty {}
 
 message Tarekomi {
     int64 id = 1;
-    int64 target_user_id = 2;
+    string target_user_name = 2;
     string url = 3;
     string desc = 4;
 }

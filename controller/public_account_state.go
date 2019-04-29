@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 
+	"github.com/NoahOrberg/evileye/config"
 	"github.com/NoahOrberg/evileye/jwt"
 	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
@@ -28,7 +29,7 @@ func (psh *publicServer) Login(c context.Context, loginreq *pb.LoginRequest) (*p
 	}
 
 	// TODO: jwt token secret は後で設定する
-	token, err := jwt.CreateJWTToken(*u, "")
+	token, err := jwt.CreateJWTToken(*u, config.GetConfig().Secret)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "cannnot set jwt token")
 	}
@@ -37,7 +38,7 @@ func (psh *publicServer) Login(c context.Context, loginreq *pb.LoginRequest) (*p
 }
 
 func encryptPassword(s string) []byte {
-	salt := "chu2byo" // TODO: あとで設定する
+	salt := config.GetConfig().Salt
 	raw := []byte(s)
 
 	res := sha256.Sum256(append(raw, salt...))

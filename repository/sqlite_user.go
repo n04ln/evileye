@@ -7,15 +7,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type sqliteUserRepository struct {
+type SqliteUserRepository struct {
 	db *sqlx.DB
 }
 
-func NewSqliteUserRepository(db *sqlx.DB) UserRepository {
-	return &sqliteUserRepository{db}
+func NewSqliteUserRepository(db *sqlx.DB) SqliteUserRepository {
+	return SqliteUserRepository{db}
 }
 
-func (r *sqliteUserRepository) UserGetByID(ctx context.Context, id int64) (*entity.User, error) {
+func (r *SqliteUserRepository) UserGetByID(ctx context.Context, id int64) (*entity.User, error) {
 	qstr := `SELECT * FROM users WHERE id = ?`
 	u := new(entity.User)
 
@@ -26,14 +26,15 @@ func (r *sqliteUserRepository) UserGetByID(ctx context.Context, id int64) (*enti
 	return u, nil
 }
 
-func (r *sqliteUserRepository) UserGetByIDList(ctx context.Context, limit, offset int64) ([]entity.User, error) {
-	qstr := `SELECT * FROM users ORDER By id LIMIT ? OFFSET ?`
-	us := make([]entity.User, 0, limit)
+func (r *SqliteUserRepository) UserGetByIDList(ctx context.Context, limit, offset int64) ([]*entity.User, error) {
+	qstr := `SELECT id, screenname FROM users ORDER By id LIMIT ? OFFSET ?`
+	us := make([]*entity.User, 0, limit)
 
 	rows, err := r.db.Query(qstr, limit, offset)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		u := entity.User{}
@@ -43,14 +44,14 @@ func (r *sqliteUserRepository) UserGetByIDList(ctx context.Context, limit, offse
 		); err != nil {
 			return nil, err
 		}
-		us = append(us, u)
+		us = append(us, &u)
 
 	}
 
 	return us, nil
 }
 
-func (r *sqliteUserRepository) UserGetByName(ctx context.Context, uname string) (*entity.User, error) {
+func (r *SqliteUserRepository) UserGetByName(ctx context.Context, uname string) (*entity.User, error) {
 
 	qstr := `SELECT * FROM users WHERE screenname = ?`
 	u := new(entity.User)
@@ -62,7 +63,7 @@ func (r *sqliteUserRepository) UserGetByName(ctx context.Context, uname string) 
 	return u, nil
 }
 
-func (r *sqliteUserRepository) Store(ctx context.Context, usr *entity.User) (*entity.User, error) {
+func (r *SqliteUserRepository) Store(ctx context.Context, usr *entity.User) (*entity.User, error) {
 	qstr := `INSERT INTO users(screenname, password) VALUES(?, ?)`
 	res, err := r.db.Exec(qstr, usr.ScreenName, usr.Password)
 	if err != nil {

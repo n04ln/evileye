@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/NoahOrberg/evileye/config"
 	"github.com/NoahOrberg/evileye/jwt"
 	"github.com/NoahOrberg/evileye/log"
 	"go.uber.org/zap"
@@ -31,7 +32,7 @@ func WithJWT(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, h
 			codes.InvalidArgument, fmt.Sprintf("method is invalid: %s", method))
 	}
 
-	if spMethod[1] == "evileye.Public" {
+	if spMethod[1] == "evileye.Public" || spMethod[1] == "evileye.Internal" {
 		return handler(ctx, req)
 	}
 
@@ -44,7 +45,7 @@ func WithJWT(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, h
 	log.L().Info("show token", zap.String("token", token))
 
 	// TODO: JWT secret を設定する
-	ui, err := jwt.GetUserInfoFromJWT(token, "")
+	ui, err := jwt.GetUserInfoFromJWT(token, config.GetConfig().Secret)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
@@ -78,4 +79,10 @@ func fromMeta(ctx context.Context, key string) (string, error) {
 	}
 
 	return parts[1], nil
+}
+
+func GetUserMetaData(ctx context.Context) *jwt.UserInfo {
+	info := ctx.Value(contextKey)
+
+	return info.(*jwt.UserInfo)
 }

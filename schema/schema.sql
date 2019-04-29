@@ -6,10 +6,11 @@ CREATE TABLE `users` (
 );
 
 CREATE TABLE `blocks` (
-    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-    `prevhash` VARCHAR(256) NOT NULL,
-    `data` VARCHAR(1024), -- TODO: tarekomiとうまくリンクさせる
-    `hash` VARCHAR(256) NOT NULL
+    `id` integer primary key autoincrement,
+    `prevhash` varchar(256) not null,
+    `data` varchar(1024), -- todo: tarekomiとうまくリンクさせる
+    `create_time` integer, -- unix time
+    `hash` varchar(256) -- NOTE: これは確認用
 );
 
 CREATE TABLE `tarekomi` (
@@ -34,4 +35,16 @@ CREATE TABLE `stars` (
     `tarekomiid` INTEGER NOT NULL
 );
 
+INSERT INTO `blocks`(prevhash, create_time, data, hash) VALUES('initial', 0, '{}', 'ac1b5c0961a7269b6a053ee64276ed0e20a7f48aefb9f67519539d23aaf10149');
+
 INSERT INTO users(screenname, password) VALUES('shinka', 'morisama');
+INSERT INTO users(screenname, password) VALUES('yt8492', 'mayamito');
+INSERT INTO users(screenname, password) VALUES('flying_hato_bus', 'hatobus');
+INSERT INTO users(screenname, password) VALUES('NoahOrberg', '12345678');
+
+INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(1, 10, 1, "https://web.archive.org/web/20190426071106/https://twitter.com/yt8492/status/1121469883059855360", "yt8492's kozirase tweet");
+INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(1, 10, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1121280748407775232", "yt8492's kozirase tweet");
+INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 10, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1119128753148325888", "yt8492's kozirase tweet");
+
+-- FOR VOTE TEST
+INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 1, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1119128753148325888", "yt8492's kozirase tweet (threshold 1 test data)");

@@ -9,11 +9,11 @@ import (
 )
 
 type ServerUserUsecaseImpl struct {
-	userRepo       repository.UserRepository
+	userRepo       repository.SqliteUserRepository
 	contextTimeout time.Duration
 }
 
-func NewUserUsecase(ur repository.UserRepository, ct time.Duration) ServerUserUsecase {
+func NewUserUsecase(ur repository.SqliteUserRepository, ct time.Duration) ServerUserUsecase {
 	return &ServerUserUsecaseImpl{
 		userRepo:       ur,
 		contextTimeout: ct,
@@ -27,7 +27,7 @@ func (u *ServerUserUsecaseImpl) UserGetByID(c context.Context, id int64) (*entit
 	return u.userRepo.UserGetByID(ctx, id)
 }
 
-func (u *ServerUserUsecaseImpl) UserGetByIDList(c context.Context, limit, offset int64) ([]entity.User, error) {
+func (u *ServerUserUsecaseImpl) UserGetByIDList(c context.Context, limit, offset int64) ([]*entity.User, error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
