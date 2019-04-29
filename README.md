@@ -22,7 +22,7 @@ $ make buildi && make docker-compose-without-pull
 - みんな誰もが第三者に適当な黒歴史を刻まれないように投票システムもあるぞ！これで誰もが安全な黒歴史ライフを送れるね！
 ### 独自合意形成アルゴリズム `HEISEI`
 ![](images/chu2female.png)
-- 独自の合意形成アルゴリズム、`HEISEI` を使っているぞ！
+- 独自の合意形成アルゴリズム、 [HEISEI](https://github.com/NoahOrberg/evileye/blob/master/doc/consensus.md) を使っているぞ！
     - ちなみにベースはPoWだぞ！
 - この合意形成アルゴリズムは `SHA256(prevHash, data, hash)` で計算した結果のbit列に、特定のbitパターンが存在するかどうかで合意形成をするぞ!
     - ちなみにその特定のbitパターンは今は懐かしの平成初頭、インターネット黎明期によく使われていた文字エンコーディング、EUC_JPでの `"平"` `"成"` のいづれかだ！！
