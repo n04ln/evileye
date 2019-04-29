@@ -23,4 +23,4 @@ $ make buildi && make docker-compose-without-pull
     - ちなみにベースはPoWだぞ！
 - この合意形成アルゴリズムは `SHA256(prevHash, data, hash)` で計算した結果のbit列に、特定のbitパターンが存在するかどうかで合意形成をするぞ!
     - ちなみにその特定のbitパターンは今は懐かしの平成初頭、インターネット黎明期によく使われていた文字エンコーディング、EUC_JPでの `"平"` `"成"` のいづれかだ！！
-
+- アルゴリズムの詳細は[こちら](https://github.com/NoahOrberg/evileye/blob/feature/fix-readme/doc/consensus.md)
