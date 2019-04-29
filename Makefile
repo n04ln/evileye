@@ -12,8 +12,10 @@ build_container := "build_evileye"
 proto:
 	protoc --proto_path=${GOPATH}/src:./protobuf/ --go_out=plugins=grpc:./protobuf ./protobuf/*.proto
 
-push: build-for-image
+buildi: build-for-image
 	docker build -t noahorberg/evileye:${tag} ./
+
+push: build-image
 	docker push noahorberg/evileye:${tag}
 
 build:
@@ -39,7 +41,9 @@ run-local:
 docker:
 	docker pull noahorberg/evileye:${tag}
 
-docker-compose: docker
+docker-compose: docker docker-compose-without-pull
+
+docker-compose-without-pull:
 	${docker_compose_env} docker-compose down
 	${docker_compose_env} docker-compose up -d
 	sleep 2

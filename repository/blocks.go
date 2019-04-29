@@ -10,19 +10,24 @@ import (
 	"go.uber.org/zap"
 )
 
+var ch = make(chan struct{}, 1)
+
 type Blocks interface {
 	GetLatestBlock() (*entity.Block, error)
 	InsertBlock(ctx context.Context, data, prevHash, hash string) (*entity.Block, error)
 }
 
 func NewBlocksRepository(db *sqlx.DB) Blocks {
+	ch <- struct{}{}
 	return &blocks{
-		db: db,
+		db:           db,
+		insertedHash: make([]string, 2, 2),
 	}
 }
 
 type blocks struct {
-	db *sqlx.DB
+	db           *sqlx.DB
+	insertedHash []string
 }
 
 func (b *blocks) GetLatestBlock() (*entity.Block, error) {
@@ -43,8 +48,42 @@ func (b *blocks) GetLatestBlock() (*entity.Block, error) {
 
 func (b *blocks) InsertBlock(ctx context.Context,
 	data, prevHash, hash string) (*entity.Block, error) {
-	block := new(entity.Block)
 
+	<-ch
+	defer func() {
+		ch <- struct{}{}
+	}()
+
+	var bl *entity.Block
+	var err error
+	if bl, err = b.GetLatestBlock(); err != nil {
+		return nil, err
+	}
+	if bl.PrevHash == prevHash {
+		log.L().Info("BLOCKING CREATE BLOCK",
+			zap.String("data", data),
+			zap.String("prevHash", prevHash),
+			zap.String("hash", hash))
+		return nil, nil
+	}
+	if bl.Hash != prevHash {
+		log.L().Info("CANNOT CREATE BLOCK COZ INVALID INTEGRITY",
+			zap.String("data", data),
+			zap.String("actual_prevHash", bl.Hash),
+			zap.String("expected_prevHash", prevHash),
+			zap.String("hash", hash))
+		return nil, nil
+	}
+	if bl.CreateTime-1 <= time.Now().Unix() && time.Now().Unix() <= bl.CreateTime+1 {
+		log.L().Info("CANNOT CREATE BLOCK COZ INVALID INTEGRITY (TIME LAG)",
+			zap.String("data", data),
+			zap.String("actual_prevHash", bl.Hash),
+			zap.String("expected_prevHash", prevHash),
+			zap.String("hash", hash))
+		return nil, nil
+	}
+
+	block := new(entity.Block)
 	block.Data = data
 	block.PrevHash = prevHash
 	block.Hash = hash
