@@ -45,7 +45,7 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 		}
 	}
 
-	if t.Threshold <= sumofvote {
+	if t.Threshold == sumofvote {
 		log.L().Info("Tarekomi approved")
 
 		t.Status = 1
@@ -128,7 +128,7 @@ func (r *SqliteVoteRepository) NewVoting(ctx context.Context, v *entity.Vote, ic
 }
 
 func VotedFromUserID(ctx context.Context, uid int64, db *sqlx.DB) ([]int64, error) {
-	qstr := `SELECT tarekomiid FROM vote WHERE userid = ?`
+	qstr := `SELECT tarekomiid FROM votes WHERE userid = ?`
 
 	voted := make([]int64, 0)
 

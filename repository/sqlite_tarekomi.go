@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"strings"
 
 	"github.com/NoahOrberg/evileye/entity"
 	"github.com/NoahOrberg/evileye/interceptor"
@@ -106,8 +108,6 @@ func (r *sqliteTarekomiRepository) GetTarekomiFromUser(ctx context.Context, id, 
 
 func (r *sqliteTarekomiRepository) GetTarekomiBoard(ctx context.Context, limit, offset int64) (pb.TarekomiSummaries, error) {
 
-	qstr := `SELECT * FROM tarekomi WHERE status = 0 ORDER BY id LIMIT ? OFFSET ? NOT IN ($1)`
-
 	tk := make([]*pb.TarekomiSummary, 0, limit)
 	ts := new(pb.TarekomiSummaries)
 
@@ -119,7 +119,26 @@ func (r *sqliteTarekomiRepository) GetTarekomiBoard(ctx context.Context, limit, 
 		return *ts, err
 	}
 
-	rows, err := r.db.Query(qstr, limit, offset, voted)
+	var rows *sql.Rows
+
+	if len(voted) > 0 {
+		qstr := `SELECT * FROM tarekomi WHERE status = 0 
+		ORDER BY id LIMIT ? OFFSET ? NOT IN (? ` + strings.Repeat(`, ?`, len(voted)-1) + `)`
+
+		args := make([]interface{}, len(voted)+2)
+		args = append(args, limit)
+		args = append(args, offset)
+		for _, d := range voted {
+			args = append(args, d)
+		}
+
+		log.L().Info("exec query and using evil solution", zap.String("qstr", qstr), zap.Any("args", args))
+		rows, err = r.db.Query(qstr, args...)
+	} else {
+		qstr := `SELECT * FROM tarekomi WHERE status = 0 ORDER BY id LIMIT ? OFFSET ?`
+		rows, err = r.db.Query(qstr, limit, offset)
+	}
+
 	if err != nil {
 		return *ts, err
 	}
