@@ -2,11 +2,12 @@ package repository
 
 import (
 	"context"
-	"log"
 
 	"github.com/NoahOrberg/evileye/entity"
+	"github.com/NoahOrberg/evileye/log"
 	p2pclient "github.com/NoahOrberg/evileye/p2p/client"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 )
 
 type SqliteVoteRepository struct {
@@ -30,13 +31,13 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 	var sumofvote int64
 	for res.Next() {
 		if err := res.Scan(&sumofvote); err != nil {
-			log.Printf("when invoked checkVotes, happens an error: %s", err)
+			log.L().Error("when invoked checkVotes, happens an error: ", zap.Error(err))
 			continue
 		}
 	}
 
-	if t.Threshold >= sumofvote {
-		log.Println("Tarekomi Approved!")
+	if t.Threshold <= sumofvote {
+		log.L().Error("Tarekomi approved")
 
 		t.Status = 1
 		_, err := UpdateTarekomiState(ctx, *t, db)
@@ -45,7 +46,7 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 		}
 
 		// get voted user id
-		uids := make([]string, 0, sumofvote)
+		unames := make([]string, 0, sumofvote)
 		rows, err := db.Query(`SELECT * FROM votes WHERE tarekomiid = ?`, t.ID)
 		if err != nil {
 			return false, err
@@ -66,7 +67,7 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 				return false, err
 			}
 
-			uids = append(uids, us.ScreenName)
+			unames = append(unames, us.ScreenName)
 		}
 
 		u := new(entity.User)
@@ -75,7 +76,11 @@ func checkVotes(ctx context.Context, tid int64, db *sqlx.DB, ic p2pclient.Intern
 			return false, err
 		}
 
-		ic.SentTxToLeaderNode(ctx, u.ScreenName, t.URL, t.Description, uids)
+		log.L().Info("SentTxToLeaderNode", zap.String("username", u.ScreenName), zap.String("url", t.URL), zap.String("description", t.Description), zap.Strings("unames", unames))
+		err = ic.SentTxToLeaderNode(ctx, u.ScreenName, t.URL, t.Description, unames)
+		if err != nil {
+			log.L().Error("SentTxToleaderNode error", zap.Error(err))
+		}
 	}
 
 	return true, nil
