@@ -28,6 +28,7 @@ type InternalClient struct {
 
 func (i *InternalClient) SentTxToLeaderNode(
 	ctx context.Context, username, url, desc string, approvedUserNames []string) error {
+
 	if _, err := i.cli.SendTx(ctx, &pb.SendTxRequest{
 		UserName:          username,
 		Url:               url,
@@ -41,6 +42,12 @@ func (i *InternalClient) SentTxToLeaderNode(
 			zap.Strings("approvedUserName", approvedUserNames))
 		return err
 	}
+
+	log.L().Info("Success SendTxToLeaderNode SentTxToLeaderNode",
+		zap.String("username", username),
+		zap.String("url", url),
+		zap.String("desc", desc),
+		zap.Strings("approvedUserName", approvedUserNames))
 
 	return nil
 }

@@ -278,6 +278,7 @@ func (s *p2pServer) SendCheckResult(ctx context.Context, req *pb.SendCheckResult
 
 func (s *p2pServer) GetTxPool(ctx context.Context, req *pb.GetTxPoolRequest) (*pb.Txs, error) {
 	log.L().Info("Invoked GetTxPool", zap.Any("req", req))
+
 	txs := make([]*pb.Tx, 0, len(s.waitTxs[req.GetId()]))
 	for _, tx := range s.waitTxs[req.GetId()] {
 		txs = append(txs, &pb.Tx{
@@ -288,7 +289,8 @@ func (s *p2pServer) GetTxPool(ctx context.Context, req *pb.GetTxPoolRequest) (*p
 		})
 	}
 
-	log.L().Info("finish GetTxPool")
+	log.L().Info("finish GetTxPool",
+		zap.Any("txs", txs))
 	return &pb.Txs{
 		Txs: txs,
 	}, nil
@@ -296,6 +298,7 @@ func (s *p2pServer) GetTxPool(ctx context.Context, req *pb.GetTxPoolRequest) (*p
 
 func (s *p2pServer) SendTx(ctx context.Context, req *pb.SendTxRequest) (*empty.Empty, error) {
 	log.L().Info("Invoked SendTx", zap.Any("req", req))
+
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
