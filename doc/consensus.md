@@ -2,7 +2,7 @@
 
 ## 独自合意形成アルゴリズム `HEISEI` とは
 - 独自合意形成アルゴリズム `HEISEI` とは、PoW (https://en.wikipedia.org/wiki/Proof-of-work_system) をベースに作成したEvilEye独自の合意形成アルゴリズム
-- PoWでは、ハッシュ値の先頭が `0` のN個の連番にならなければならないところを、HEISEIアルゴリズムでは、平成初頭の日本のインターネット界隈を牽引してきた素晴らしき文字コードであるEUC_JPでの `"平"(0xCABF)`, `"成"(0xC0AE)` (ref. ![http://charset.7jp.net/euc.html](http://charset.7jp.net/euc.html)) がビットパターンとして存在していればブロック作成の権利を得る
+- PoWでは、ハッシュ値の先頭が `0` のN個の連番にならなければならないところを、HEISEIアルゴリズムでは、平成初頭の日本のインターネット界隈を牽引してきた素晴らしき文字コードであるEUC_JPでの `"平"(0xCABF)`, `"成"(0xC0AE)` (ref. [http://charset.7jp.net/euc.html](http://charset.7jp.net/euc.html)) がビットパターンとして存在していればブロック作成の権利を得る
 
 ## 合意形成のフロー
 大まかには以下のようなフローでブロック生成のための合意形成を行う
