@@ -66,6 +66,7 @@ func (pth *privateServer) AddStar(c context.Context, addstarreq *pb.AddStarReq) 
 
 	_, err := pth.SRepository.Store(c, ns)
 	if err != nil {
+		log.L().Error("Star Store error", zap.Error(err))
 		return &pb.Empty{}, status.Error(codes.Internal, "Database Down")
 	}
 
@@ -77,6 +78,7 @@ func (pth *privateServer) GetStaredTarekomi(c context.Context, e *pb.Empty) (*pb
 
 	tids, err := pth.SRepository.GetStaredTarekomiID(c, ui.ID)
 	if err != nil {
+		log.L().Error("GetStardTarekmiID error", zap.Error(err))
 		return &pb.TarekomiSummaries{}, status.Error(codes.Internal, "Databae Down")
 	}
 
@@ -85,6 +87,7 @@ func (pth *privateServer) GetStaredTarekomi(c context.Context, e *pb.Empty) (*pb
 	for _, tid := range tids {
 		t, err := pth.TRepository.GetTarekomiFromID(c, tid)
 		if err != nil {
+			log.L().Error("GetTarekomiFromID error ", zap.Error(err))
 			return ts, status.Error(codes.Internal, "cannot get requested tarekomi")
 		}
 		ts.Tarekomis = append(ts.Tarekomis, &t)
