@@ -100,3 +100,30 @@ func (r *SqliteVoteRepository) NewVoting(ctx context.Context, v *entity.Vote, ic
 
 	return nil
 }
+
+func VotedFromUserID(ctx context.Context, uid int64, db *sqlx.DB) ([]int64, error) {
+	qstr := `SELECT tarekomiid FROM vote WHERE userid = ?`
+
+	voted := make([]int64, 0)
+
+	rows, err := db.Query(qstr, uid)
+	if err != nil {
+		log.L().Error("VotedFromUserID error", zap.Error(err))
+		return nil, err
+	}
+
+	for rows.Next() {
+		v := entity.Vote{}
+
+		if err := rows.Scan(
+			&v.TarekomiID,
+		); err != nil {
+			log.L().Error("VotedFromUserID error", zap.Error(err))
+			return voted, err
+		}
+
+		voted = append(voted, v.TarekomiID)
+	}
+
+	return voted, nil
+}

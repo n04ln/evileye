@@ -4,8 +4,11 @@ import (
 	"context"
 
 	"github.com/NoahOrberg/evileye/entity"
+	"github.com/NoahOrberg/evileye/interceptor"
+	"github.com/NoahOrberg/evileye/log"
 	pb "github.com/NoahOrberg/evileye/protobuf"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 )
 
 var (
@@ -99,12 +102,20 @@ func (r *sqliteTarekomiRepository) GetTarekomiFromUser(ctx context.Context, id, 
 
 func (r *sqliteTarekomiRepository) GetTarekomiBoard(ctx context.Context, limit, offset int64) (pb.TarekomiSummaries, error) {
 
-	qstr := `SELECT * FROM tarekomi WHERE status = 0 ORDER BY id LIMIT ? OFFSET ?`
+	qstr := `SELECT * FROM tarekomi WHERE status = 0 ORDER BY id LIMIT ? OFFSET ? NOT IN ($1)`
 
 	tk := make([]*pb.TarekomiSummary, 0, limit)
 	ts := new(pb.TarekomiSummaries)
 
-	rows, err := r.db.Query(qstr, limit, offset)
+	ui := interceptor.GetUserMetaData(ctx)
+
+	voted, err := VotedFromUserID(ctx, ui.ID, r.db)
+	if err != nil {
+		log.L().Error("VotedFromUserID error", zap.Error(err))
+		return *ts, err
+	}
+
+	rows, err := r.db.Query(qstr, limit, offset, voted)
 	if err != nil {
 		return *ts, err
 	}
