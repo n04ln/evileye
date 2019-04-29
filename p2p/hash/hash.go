@@ -81,7 +81,8 @@ func (b *BackgroundTask) Do() {
 			continue
 		}
 		prevHash := latestBlock.Hash
-		if canGenerateBlock(prevHash, nonce) {
+		data := latestBlock.Data
+		if canGenerateBlock(prevHash, data, nonce) {
 			b.once.Do(func() {
 				log.L().Info("FIRST SUCESS HASH CALC in BACKGROUND TASK, So add Client Connection!")
 				// Connect other nodes
@@ -151,12 +152,13 @@ func (b BackgroundTask) IsValidNonce(nonce string) bool {
 		return false
 	}
 	prevHash := latestBlock.Hash
-	return canGenerateBlock(prevHash, nonce)
+	data := latestBlock.Data
+	return canGenerateBlock(prevHash, data, nonce)
 }
 
 // canGenerateBlock ... ハッシュ計算をして、ブロックが作れるかどうかを見る
 // この関数がTRUEを返したら、見事ブロックを作成する権利が得られる
-func canGenerateBlock(prevHash, nonce string) bool {
+func canGenerateBlock(prevHash, data, nonce string) bool {
 	// このなかのいづれかが含まれればよい
 	parts := [][]byte{
 		[]byte{0xCA, 0xBF}, // 平
@@ -178,6 +180,8 @@ func canGenerateBlock(prevHash, nonce string) bool {
 	isOk := check(h[:], parts)
 	log.L().Info("calced Hash is",
 		zap.String("value", hex.EncodeToString(h[:])),
+		zap.String("prevdata", data),
+		zap.String("prevhash", prevHash),
 		zap.String("nonce", nonce),
 		zap.Strings("parts", func(parts [][]byte) []string {
 			bytesFromShiftJIS := func(b []byte) (string, error) {
