@@ -106,6 +106,47 @@ func (r *sqliteTarekomiRepository) GetTarekomiFromUser(ctx context.Context, id, 
 	return *ts, nil
 }
 
+func (r *sqliteTarekomiRepository) GetTarekomiApproved(ctx context.Context, uid int64) ([]*pb.Tarekomi, error) {
+
+	ts := make([]*pb.Tarekomi, 0)
+
+	qstr := `SELECT * FROM tarekomi WHERE targetuserid = ? AND status = 1`
+
+	rows, err := r.db.Query(qstr, uid)
+	if err != nil {
+		return ts, err
+	}
+
+	for rows.Next() {
+		t := entity.Tarekomi{}
+		if err := rows.Scan(
+			&t.ID,
+			&t.Status,
+			&t.Threshold,
+			&t.TargetUserID,
+			&t.URL,
+			&t.Description,
+		); err != nil {
+			return ts, err
+		}
+
+		u1, err := getUserByID(ctx, t.ID, r.db)
+		if err != nil {
+			return ts, err
+		}
+
+		tp := &pb.Tarekomi{
+			TargetUserName: u1.ScreenName,
+			Url:            t.URL,
+			Desc:           t.Description,
+		}
+
+		ts = append(ts, tp)
+	}
+
+	return ts, nil
+}
+
 func (r *sqliteTarekomiRepository) GetTarekomiBoard(ctx context.Context, limit, offset int64) (pb.TarekomiSummaries, error) {
 
 	tk := make([]*pb.TarekomiSummary, 0, limit)
