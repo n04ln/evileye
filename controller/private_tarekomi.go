@@ -2,8 +2,8 @@ package controller
 
 import (
 	"context"
+	"strings"
 
-	"github.com/NoahOrberg/evileye/config"
 	"github.com/NoahOrberg/evileye/entity"
 	"github.com/NoahOrberg/evileye/interceptor"
 	"github.com/NoahOrberg/evileye/log"
@@ -15,6 +15,13 @@ import (
 )
 
 func (pth *privateServer) Tarekomi(c context.Context, tarekomireq *pb.TarekomiReq) (*pb.Empty, error) {
+	// VALIDATION
+	ok1, ok2 := strings.HasPrefix(tarekomireq.GetTarekomi().GetUrl(), "https://"), strings.HasPrefix(tarekomireq.GetTarekomi().GetUrl(), "http://")
+	if !ok1 || !ok2 {
+		return nil, status.Error(codes.InvalidArgument, "URLが不正だよ！")
+	}
+	//
+
 	u, err := pth.URepository.UserGetByName(c, tarekomireq.Tarekomi.TargetUserName)
 	if err != nil {
 		log.L().Error("cannot get requested user name : ", zap.Error(err))
@@ -29,7 +36,7 @@ func (pth *privateServer) Tarekomi(c context.Context, tarekomireq *pb.TarekomiRe
 
 	nt := entity.Tarekomi{
 		Status:       0,
-		Threshold:    config.GetConfig().Threshold,
+		Threshold:    2,
 		TargetUserID: u.ID,
 		URL:          wayurl,
 		Description:  tarekomireq.Tarekomi.Desc,

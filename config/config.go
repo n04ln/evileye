@@ -8,9 +8,8 @@ var (
 )
 
 type Config struct {
-	Salt      string `default:"chu2byo"`
-	Secret    string `default:"welcome_to_underground"`
-	Threshold int64  `default:10`
+	Salt   string `default:"chu2byo"`
+	Secret string `default:"welcome_to_underground"`
 }
 
 var config Config
