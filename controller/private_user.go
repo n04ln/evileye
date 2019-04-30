@@ -20,9 +20,15 @@ func (puh *privateServer) GetUserInfo(c context.Context, uinforeq *pb.UserInfoRe
 		return &pb.User{}, status.Error(codes.Internal, "Database down")
 	}
 
+	tarekomi, err := puh.TRepository.GetTarekomiApproved(c, ui.ID)
+	if err != nil {
+		log.L().Error("GetTarekomiApproved error", zap.Error(err))
+	}
+
 	return &pb.User{
-		UserId:   u.ID,
-		UserName: u.ScreenName,
+		UserId:    u.ID,
+		UserName:  u.ScreenName,
+		Tarekomis: tarekomi,
 	}, nil
 }
 
