@@ -41,6 +41,7 @@ INSERT INTO users(screenname, password) VALUES('shinka', 'morisama');
 INSERT INTO users(screenname, password) VALUES('yt8492', 'mayamito');
 INSERT INTO users(screenname, password) VALUES('flying_hato_bus', 'hatobus');
 INSERT INTO users(screenname, password) VALUES('NoahOrberg', '12345678');
+INSERT INTO users(screenname, password) VALUES('guest', 'guestuser');
 
 INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(1, 10, 1, "https://web.archive.org/save/http://d.hatena.ne.jp/aplle-5/20121014", "hatobus's dark history");
 INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(1, 10, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1114130271316504576", "yt8492's kozirase tweet");
