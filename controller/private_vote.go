@@ -23,7 +23,7 @@ func (pvh *privateServer) Vote(c context.Context, votereq *pb.VoteReq) (*pb.Empt
 
 	err := pvh.VRepository.NewVoting(c, nv, pvh.IClient)
 	if err != nil {
-		log.L().Error("NewVoting failed", zap.Error(err))
+		log.L().Error("NewVoting failed", zap.Any("req", votereq), zap.Error(err))
 		return &pb.Empty{}, status.Error(codes.Internal, "Database down")
 	}
 
