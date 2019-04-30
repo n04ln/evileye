@@ -47,6 +47,7 @@ func getUserByID(ctx context.Context, uid int64, db *sqlx.DB) (*entity.User, err
 	u := new(entity.User)
 
 	if err := db.Get(u, qstr, uid); err != nil {
+		log.L().Error("user get error", zap.Error(err), zap.String("query", qstr), zap.Int64("uid", uid))
 		return nil, err
 	}
 
