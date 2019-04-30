@@ -20,9 +20,15 @@ func (puh *privateServer) GetUserInfo(c context.Context, uinforeq *pb.UserInfoRe
 		return &pb.User{}, status.Error(codes.Internal, "Database down")
 	}
 
+	tarekomi, err := puh.TRepository.GetTarekomiApproved(c, ui.ID)
+	if err != nil {
+		log.L().Error("GetTarekomiApproved error", zap.Error(err))
+	}
+
 	return &pb.User{
-		UserId:   u.ID,
-		UserName: u.ScreenName,
+		UserId:    u.ID,
+		UserName:  u.ScreenName,
+		Tarekomis: tarekomi,
 	}, nil
 }
 
@@ -42,6 +48,12 @@ func (puh *privateServer) GetUserList(c context.Context, userlistreq *pb.GetUser
 			UserId:   eu.ID,
 			UserName: eu.ScreenName,
 		}
+
+		tarekomi, err := puh.TRepository.GetTarekomiApproved(c, u.UserId)
+		if err != nil {
+			log.L().Error("GetTarekomiApproved error", zap.Error(err))
+		}
+		u.Tarekomis = tarekomi
 		usr = append(usr, u)
 	}
 
