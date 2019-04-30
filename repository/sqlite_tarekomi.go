@@ -205,6 +205,7 @@ func (r *sqliteTarekomiRepository) GetTarekomiBoard(ctx context.Context, limit, 
 
 		tp := pb.TarekomiSummary{
 			Tarekomi: &pb.Tarekomi{
+				Id:             t.ID,
 				TargetUserName: n.ScreenName,
 				Url:            t.URL,
 				Desc:           t.Description,
