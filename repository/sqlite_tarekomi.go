@@ -133,7 +133,7 @@ func (r *sqliteTarekomiRepository) GetTarekomiApproved(ctx context.Context, uid 
 			return ts, err
 		}
 
-		u1, err := getUserByID(ctx, t.ID, r.db)
+		u1, err := getUserByID(ctx, t.TargetUserID, r.db)
 		if err != nil {
 			log.L().Error("getUserByID error", zap.Error(err))
 			return ts, err
