@@ -114,7 +114,7 @@ func (r *sqliteTarekomiRepository) GetTarekomiApproved(ctx context.Context, uid 
 
 	rows, err := r.db.Query(qstr, uid)
 	if err != nil {
-		log.L().Error("get tareget userid faild", zap.Error(err))
+		log.L().Error("get tareget userid faild", zap.Error(err), zap.Int64("uid", uid), zap.String("sql", qstr))
 		return ts, err
 	}
 
