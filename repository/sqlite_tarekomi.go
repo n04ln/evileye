@@ -114,6 +114,7 @@ func (r *sqliteTarekomiRepository) GetTarekomiApproved(ctx context.Context, uid 
 
 	rows, err := r.db.Query(qstr, uid)
 	if err != nil {
+		log.L().Error("get tareget userid faild", zap.Error(err))
 		return ts, err
 	}
 
@@ -127,11 +128,13 @@ func (r *sqliteTarekomiRepository) GetTarekomiApproved(ctx context.Context, uid 
 			&t.URL,
 			&t.Description,
 		); err != nil {
+			log.L().Error("rows mapping error", zap.Error(err))
 			return ts, err
 		}
 
 		u1, err := getUserByID(ctx, t.ID, r.db)
 		if err != nil {
+			log.L().Error("getUserByID error", zap.Error(err))
 			return ts, err
 		}
 
