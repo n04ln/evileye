@@ -44,8 +44,8 @@ INSERT INTO users(screenname, password) VALUES('NoahOrberg', '12345678');
 INSERT INTO users(screenname, password) VALUES('guest', 'guestuser');
 
 INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(1, 10, 1, "https://web.archive.org/save/http://d.hatena.ne.jp/aplle-5/20121014", "hatobus's dark history");
-INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(1, 10, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1114130271316504576", "yt8492's kozirase tweet");
-INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 10, 1, "https://web.archive.org/save/https:/twitter.com/NoahOrberg/status/835029021612089344", "noah's kozirase tweet");
+INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(1, 10, 1, "https://web.archive.org/save/https://hatobus.hatenablog.jp/entry/2018/07/05/104114", "hatobus's dark history blog");
+INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 10, 1, "https://web.archive.org/web/20190430051911/http://noahorberg.hatenablog.com/entry/2018/12/16/204957?_ga=2.231062615.953365373.1556587926-311450958.1547619044", "noah's dark history blog");
 
 -- FOR VOTE TEST
-INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 1, 1, "https://web.archive.org/save/https://twitter.com/yt8492/status/1119128753148325888", "yt8492's kozirase tweet");
+INSERT INTO tarekomi(status, threshold, targetuserid, url, description) VALUES(0, 1, 1, "https://web.archive.org/save/http://noahorberg.hatenablog.com/entry/2015/03/02/095231", "noah's dark history blog");
